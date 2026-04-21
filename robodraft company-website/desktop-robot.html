@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Robo Draft Automation | Desktop Robot - JTH Series</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/jpeg" href="rda.jpg" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        /* Professional Color Palette & Typography */
+        :root {
+            --primary: #0d1b2a; /* Dark Navy for main elements */
+            --accent: #ffc107;  /* Yellow/Gold for highlights */
+            --muted: #555;      /* Darker grey for body text */
+            --light-bg: #f5f6f7; /* Very light grey background */
+            --white: #fff;
+        }
+        body { 
+            font-family: 'Poppins', 'Segoe UI', sans-serif; /* Slightly more modern font stack */
+            background: var(--light-bg); 
+            color: #222; 
+        }
+
+        /* --- Navbar Styles --- */
+        .navbar { 
+            background: var(--primary); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+        }
+        .navbar-brand img { 
+            height:56px; 
+            border-radius:6px; 
+            border:1px solid var(--accent); /* Logo highlight */
+            padding:2px; 
+        }
+        .navbar-nav .nav-link {
+            color: var(--white) !important; 
+            font-weight: 500; /* Adjusted for better readability */
+            margin: 0 8px; 
+            transition: color .3s ease-in-out;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .navbar-nav .nav-link:hover, .navbar-nav .nav-link.active:hover {
+            color: var(--accent) !important; 
+            text-shadow: 0 0 10px rgba(255,193,7,0.6);
+        }
+        .navbar-nav .nav-link.active {
+            color: var(--accent) !important; 
+            font-weight: 700;
+        }
+        /* Active link style inside the dropdown */
+        .dropdown-item.active {
+            background: var(--accent) !important; 
+            color: var(--primary) !important; 
+            font-weight: 600 !important;
+        }
+        
+        /* === Dropdown Submenu Fixes (LEFT side opening and stylish pop-out) === */
+        .dropdown-submenu { position:relative; }
+        .dropdown-submenu > .dropdown-menu {
+            top: 0; 
+            left: auto; 
+            right: 100%; 
+            margin-right: -1px; 
+            
+            display:none; 
+            opacity:0; 
+            transform: translateX(-10px); /* Slightly increased initial shift */
+            transition: all .3s cubic-bezier(0.165, 0.84, 0.44, 1); /* Smoother animation curve */
+
+            border:none; border-radius:10px; box-shadow:0 8px 20px rgba(0,0,0,0.2); /* Deeper shadow */
+        }
+        .dropdown-menu {
+            border:none; border-radius:10px; box-shadow:0 8px 20px rgba(0,0,0,0.2);
+            padding: 10px 0; /* Add padding inside dropdown */
+        }
+
+        @media (min-width: 992px){
+            .dropdown:hover > .dropdown-menu,
+            .dropdown-submenu:hover > .dropdown-menu { 
+                display:block; 
+                opacity:1; 
+                transform: translateX(0); 
+            }
+        }
+        .dropdown-item {
+            padding: 8px 20px;
+            font-size: 0.95rem;
+            color: #333;
+        }
+        .dropdown-item:hover { 
+            background: var(--accent); 
+            color: var(--primary); 
+            font-weight: 600; 
+        }
+        /* Mobile Fix - Cleaned up and consolidated */
+        @media (max-width: 991px){
+            .dropdown-menu { 
+                position:static !important; 
+                transform:none !important; 
+                opacity:1 !important; 
+                display:none; 
+                right: auto !important; 
+                margin-right: 0 !important;
+                border-left: 2px solid var(--accent); /* Mobile visual hierarchy */
+            }
+            .dropdown-menu.show { display:block !important; }
+            .dropdown-submenu > .dropdown-menu { 
+                margin-left: 1.5rem !important; /* Increased indent */
+                padding: 5px 0;
+            }
+        }
+        /* ================================================= */
+
+        /* --- Hero Section (The Top Image Area inside the tab) --- */
+        .hero {
+            background-size: cover !important;
+            background-position: center !important;
+            padding: 80px 20px; /* Reduced padding slightly */
+            text-align: center;
+            border-radius: 12px;
+            margin-top: 30px;
+            margin-bottom: 30px; /* Added bottom margin */
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15); /* Slightly stronger shadow */
+            min-height: 300px; /* Adjusted min-height */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(13, 27, 42, 0.65); /* Darker overlay for text contrast */
+            z-index: 1;
+        }
+        .hero h1, .hero p {
+            position: relative;
+            z-index: 2;
+            color: var(--accent);
+            text-shadow: 0 3px 12px rgba(0,0,0,0.95); /* Sharper text shadow */
+        }
+        .hero h1 { 
+            font-weight: 900; 
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+        .hero p.lead {
+             font-size: 1.25rem;
+             color: #ffda85; /* Lighter accent shade for lead text */
+        }
+        
+        /* Individual Hero Styles based on image provided */
+        /* Used the image from the previous response for consistency */
+        .hero-jth { background-image: url('https://www.toyorobotics.co/assets/images/cartesian.png'); } 
+        
+        /* --- Content Area --- */
+        .content-container {
+            background: var(--white);
+            padding: 40px; /* Increased padding */
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); /* Smoother shadow */
+        }
+        .section-header {
+            color: var(--primary);
+            font-weight: 800;
+            font-size: 1.8rem;
+            border-bottom: 3px solid var(--accent); /* Thicker accent line */
+            padding-bottom: 10px;
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+        /* Overriding the default list style from the previous HTML, using the new list style from the provided CSS snippet for consistency */
+        ul { list-style: disc; padding-left: 25px; } 
+        ul li { margin-bottom: 10px; line-height: 1.6; } /* Better line spacing */
+        p { line-height: 1.6; }
+
+        /* Image styling */
+        .product-image-container {
+            border: 2px solid var(--accent);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            background: var(--light-bg);
+            margin-bottom: 20px;
+        }
+        .product-image-container img { width: 100%; height: auto; border-radius: 8px; max-height: 400px; object-fit: contain; }
+
+        /* Application list (using a specific list style from the previous request for visual differentiation) */
+        .application-item {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            background: #fff;
+            transition: all 0.3s;
+        }
+        .application-item:hover {
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            transform: translateY(-5px);
+        }
+        .application-item h5 {
+            color: var(--primary);
+            font-weight: 700;
+            margin-top: 15px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        .application-item .app-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        /* Call to Action Button */
+        .btn-lg {
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            transition: background 0.3s, transform 0.2s;
+        }
+        .btn-lg:hover {
+            background: #ffdb7d !important;
+            transform: translateY(-2px);
+        }
+
+        /* --- Footer --- */
+        footer {
+            background: var(--primary);
+            color: #ddd; /* Lighter text color */
+            text-align: center;
+            padding: 50px 0; /* Increased padding */
+            margin-top: 80px;
+        }
+        footer a { color: var(--accent); text-decoration: none; transition: color 0.3s; }
+        footer a:hover { color: var(--white); text-decoration: underline; }
+
+        /* General utility */
+        .text-nowrap { white-space: nowrap; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="index.html">
+            <img src="rda.jpg" onerror="this.onerror=null; this.src='https://placehold.co/56x56/0d1b2a/ffc107?text=RDA';" alt="ROBO DRAFT logo" class="me-3">
+            <div>
+                <div style="color:var(--white); font-weight:800; font-size:1.25rem;">ROBO DRAFT AUTOMATION</div>
+                <div style="color:var(--accent); font-weight:600; font-size:.85rem; letter-spacing: 1px;">ROBUST FUTURE</div>
+            </div>
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navMenu">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="index.html#about">About</a></li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" id="productsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Products
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="productsDropdown">
+
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">Toyo Actuators</a>
+                            <ul class="dropdown-menu">
+
+                                <li class="dropdown-submenu">
+                                    <a class="dropdown-item dropdown-toggle" href="#">Motorless Actuators</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="ball-screw.html">Ball Screw Type</a></li>
+                                        <li><a class="dropdown-item" href="belt-actuators.html">Belt Type</a></li>
+                                        <li><a class="dropdown-item" href="rod-type.html">Rod Type</a></li>
+                                        <li><a class="dropdown-item" href="clean-room.html">Clean Room</a></li>
+                                        <li><a class="dropdown-item" href="rack-pinion.html">Rack & Pinion</a></li>
+                                        <li><a class="dropdown-item" href="multi-axis.html">Multi Axis Actuator</a></li>
+                                    </ul>
+                                </li>
+
+                                <li class="dropdown-submenu">
+                                    <a class="dropdown-item dropdown-toggle" href="#">Actuator with Motor</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="stepper-motor.html">Stepper Motor Actuator</a></li>
+                                        <li><a class="dropdown-item" href="servo-motor.html">Servo Motor Actuator</a></li>
+                                        <li><a class="dropdown-item" href="mini-cylinder.html">Mini Cylinder</a></li>
+                                        <li><a class="dropdown-item" href="gripper.html">Gripper</a></li>
+                                    </ul>
+                                </li>
+
+                                <li class="dropdown-submenu">
+                                    <a class="dropdown-item dropdown-toggle active" href="#">Robot</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item active" href="#">Desktop Robot</a></li>
+                                        <li><a class="dropdown-item" href="cartesian-robot.html">Cartesian Robot</a></li>
+                                        <li><a class="dropdown-item" href="linear-motor-actuator.html">Linear Motor Actuator</a></li>
+                                        <li><a class="dropdown-item" href="air-bearing.html">Air Bearing Linear Stage</a></li>
+                                        <li><a class="dropdown-item" href="cast-iron.html">Cast Iron Axis Stage</a></li>
+                                        <li><a class="dropdown-item" href="horizontal-z.html">Horizontal Z Axis Stage</a></li>
+                                        <li><a class="dropdown-item" href="alignment-stage.html">Alignment Stage</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">Pneumatics</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="iso-cylinder.html">ISO Cylinder</a></li>
+                                <li><a class="dropdown-item" href="compact-cylinder.html">Compact Cylinder</a></li>
+                                <li><a class="dropdown-item" href="solenoid-valve.html">Solenoid Valves</a></li>
+                                <li><a class="dropdown-item" href="pneumatic-accessories.html">Pneumatic Accessories</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Services
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="servicesDropdown">
+                        
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">SPM Machines</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="vision-inspection.html">Vision Inspection</a></li>
+                                <li><a class="dropdown-item" href="assembly-machines.html">Assembly Machines</a></li>
+                                <li><a class="dropdown-item" href="pick-place.html">Pick & Place</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">Electrical Panel</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="panel-designing.html">Panel Designing</a></li>
+                                <li><a class="dropdown-item" href="panel-wiring.html">Panel Wiring</a></li>
+                                <li><a class="dropdown-item" href="control-panel.html">Control Panel</a></li>
+                                <li><a class="dropdown-item" href="plc-support.html">PLC Support</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">Data Acquisition System</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="java-tech.html">Java Tech</a></li>
+                                <li><a class="dropdown-item" href="labview-tech.html">LabVIEW Tech</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="nav-item"><a class="nav-link" href="#contact-footer">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<main class="container py-5">
+    <div class="content-container">
+
+        <div class="hero hero-jth">
+            <h1 class="text-uppercase">Desktop Robot - JTH Series</h1>
+            <p class="lead">High-precision, fully automated Cartesian robot system for desktop manufacturing processes.</p>
+        </div>
+        
+        <h2 class="section-header"><i class="bi bi-robot me-2"></i> Product Overview: Cartesian Robot Technology</h2>
+        <div class="row g-5 align-items-center">
+            <div class="col-md-7">
+                <p>The Toyo **JTH Series Desktop Robot** operates on a **three-axis coordinate system** similar to the Cartesian system ($X, Y, Z$). This structure ensures highly precise and controllable motion, making it ideal for delicate and complex automation tasks.</p>
+                
+                <p>Each axis is equipped with **linear actuators or motors** that enable highly accurate linear motion, which can be controlled independently by a computerized control system. This ensures the robot moves in straight lines along each axis.</p>
+
+                <p>The JTH series is controlled by the **TSC400 controller**, which manages all axis motions based on programmed instructions, offering comprehensive programming and operational control.</p>
+            </div>
+            
+            <div class="col-md-5 text-center">
+                <div class="product-image-container">
+                    <img src="https://www.toyorobotics.co/assets/images/project/desktop-robot-internal-structure.png" alt="Desktop Robot Internal Structure JTH Series" class="img-fluid" onerror="this.onerror=null; this.src='https://placehold.co/400x350/0d1b2a/ffc107?text=JTH+Internal+Structure';">
+                </div>
+            </div>
+        </div>
+
+        <h2 class="section-header mt-5"><i class="bi bi-list-check me-2"></i> Key Features</h2>
+        <div class="row">
+            <div class="col-md-6">
+                <ul>
+                    <li>**Fully Ball Screw Driven:** Improves single and multi-axis positioning accuracy.</li>
+                    <li>**Z-Axis Ball Screw System:** Enhances overall system accuracy and reduces the chance of missed motor steps.</li>
+                    <li>**High-Performance Option (JTHS):** Offers no missed steps, high speed, and high precision for high load applications.</li>
+                    <li>**XY Axis Cover:** Prevents unwanted foreign object inclusion.</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                 <ul>
+                    <li>**Integrated Cable Tracks:** Built-in cable management improves both safety and aesthetic appeal.</li>
+                    <li>**TSC400 Controller:** Dedicated control and programming system for the Cartesian robot.</li>
+                    <li>**LCD Panel Interface:** Provides easy access for recipe selection, emergency stop, and dispense override buttons.</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2 class="section-header mt-5"><i class="bi bi-droplet-fill me-2"></i> Dispensing Functions</h2>
+        <p>The JTH desktop robot is highly capable in automated fluid dispensing, ensuring precision and uniformity for various applications, including sealing, bonding, and coating.</p>
+        <div class="row g-4 mt-3">
+            <div class="col-md-6">
+                <div class="product-image-container text-center">
+                    <img src="https://www.toyorobotics.co/assets/images/project/dispensing-functions.jpg" alt="Dispensing Function Example 1" class="img-fluid" onerror="this.onerror=null; this.src='https://placehold.co/400x300/0d1b2a/ffc107?text=Dispensing+Example+1';">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="product-image-container text-center">
+                    <img src="https://www.toyorobotics.co/assets/images/project/dispensing-fuunctions2.jpg" alt="Dispensing Function Example 2" class="img-fluid" onerror="this.onerror=null; this.src='https://placehold.co/400x300/0d1b2a/ffc107?text=Dispensing+Example+2';">
+                </div>
+            </div>
+        </div>
+
+        <h2 class="section-header mt-5"><i class="bi bi-tools me-2"></i> Applications</h2>
+        <div class="row g-4 mt-3">
+            
+            <div class="col-md-6">
+                <div class="application-item">
+                    <img src="https://www.toyorobotics.co/assets/images/project/cutting-machining.jpg" alt="Cutting Machining Application" class="app-img" onerror="this.onerror=null; this.src='https://placehold.co/400x200/0d1b2a/ffc107?text=Cutting+Machining';">
+                    <h5>Cutting (Machining)</h5>
+                    <p>Performs **precise abstract cutting** by placing the PCB on the $XY$ axis moving table and mounting the matching tool on the $Z$ axis single linear actuator for controlled material removal.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="application-item">
+                    <img src="https://www.toyorobotics.co/assets/images/project/soldering.jpg" alt="Soldering Application" class="app-img" onerror="this.onerror=null; this.src='https://placehold.co/400x200/0d1b2a/ffc107?text=Soldering+Application';">
+                    <h5>Soldering</h5>
+                    <p>Equipped with an automatic soldering tool, the robot can achieve **fully automated soldering** by placing the PCB on the sliding table and executing programmed soldering paths.</p>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    
+    <div class="text-center mt-6 py-5 border-top border-bottom">
+        <h3 class="fw-bold" style="color:var(--primary);">Optimize Your Production with JTH Series</h3>
+        <p class="lead mb-4" style="color:var(--muted);">
+            Ready to upgrade your manufacturing processes? Contact us for detailed specifications and ordering.
+        </p>
+        <a href="#contact-footer" class="btn btn-lg fw-bold" style="background:var(--accent); color:var(--primary);">
+            <i class="bi bi-envelope-fill me-2"></i> Request a Quote
+        </a>
+    </div>
+</main>
+
+<footer id="contact-footer">
+    <div class="container text-center">
+        <h4 class="fw-bold mb-4 text-uppercase" style="color:var(--accent);">
+            <i class="bi bi-headset me-2"></i> Contact Robo Draft Automation
+        </h4>
+        <p class="mb-2">24, Vijaya Nagar, Mel Ayanambakkam,<br>Opp to Royal Club, Chennai - 600098.</p>
+        <p class="mb-4 lead">
+            <i class="bi bi-envelope-fill me-2"></i> Email: <a href="mailto:robodraftautomation@gmail.com">robodraftautomation@gmail.com</a>
+            &nbsp;|&nbsp;
+            <i class="bi bi-phone-fill me-2"></i> Phone: <a href="tel:9944533640">99445 33640</a>, <a href="tel:9840435640">98404 35640</a>
+        </p>
+        <p class="text-white-50 small">&copy; <span id="current-year"></span> Robo Draft Automation. All rights reserved.</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // JavaScript to handle the nested dropdown functionality and footer year
+    document.addEventListener("DOMContentLoaded", function(){
+        // Set current year in the footer
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // Handle nested dropdowns (dropdown-submenu)
+        document.querySelectorAll('.dropdown-submenu > a').forEach(function(element){
+            element.addEventListener('click', function(e){
+                e.preventDefault();
+                e.stopPropagation(); // Stop event from closing the main dropdown
+
+                let nextSibling = element.nextElementSibling;
+                
+                // Close all other open submenus at the same level
+                element.closest('.dropdown-menu').querySelectorAll('.dropdown-menu').forEach(function(menu){
+                    if(menu !== nextSibling){
+                        menu.classList.remove('show');
+                    }
+                });
+
+                // Toggle the current submenu
+                if (nextSibling && nextSibling.classList.contains('dropdown-menu')) {
+                    nextSibling.classList.toggle('show');
+                }
+            });
+        });
+
+        // Close submenus when clicking outside (mobile fix)
+        document.querySelectorAll('.dropdown-toggle').forEach(function(toggle){
+            toggle.addEventListener('hidden.bs.dropdown', function () {
+                this.closest('.dropdown').querySelectorAll('.dropdown-submenu > .dropdown-menu').forEach(function(menu){
+                    menu.classList.remove('show');
+                });
+            })
+        });
+    });
+</script>
+</body>
+</html>

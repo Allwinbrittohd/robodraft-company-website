@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Robo Draft Automation | Cleanroom Actuators</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/jpeg" href="rda.jpg" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        /* Professional Color Palette & Typography */
+        :root {
+            --primary: #0d1b2a; /* Dark Navy for main elements */
+            --accent: #ffc107;  /* Yellow/Gold for highlights */
+            --muted: #555;      /* Darker grey for body text */
+            --light-bg: #f5f6f7; /* Very light grey background */
+            --white: #fff;
+        }
+        body { 
+            font-family: 'Poppins', 'Segoe UI', sans-serif; /* Slightly more modern font stack */
+            background: var(--light-bg); 
+            color: #222; 
+        }
+
+        /* --- Navbar Styles --- */
+        .navbar { 
+            background: var(--primary); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+        }
+        .navbar-brand img { 
+            height:56px; 
+            border-radius:6px; 
+            border:1px solid var(--accent); /* Logo highlight */
+            padding:2px; 
+        }
+        .navbar-nav .nav-link {
+            color: var(--white) !important; 
+            font-weight: 500; /* Adjusted for better readability */
+            margin: 0 8px; 
+            transition: color .3s ease-in-out;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .navbar-nav .nav-link:hover {
+            color: var(--accent) !important; 
+            text-shadow: 0 0 10px rgba(255,193,7,0.6);
+        }
+        /* Active link style inside the dropdown */
+        .dropdown-item.active {
+            background: var(--accent) !important; 
+            color: var(--primary) !important; 
+            font-weight: 600 !important;
+        }
+        
+        /* === Dropdown Submenu Fixes (LEFT side opening and stylish pop-out) === */
+        .dropdown-submenu { position:relative; }
+        .dropdown-submenu > .dropdown-menu {
+            top: 0; 
+            left: auto; 
+            right: 100%; 
+            margin-right: -1px; 
+            
+            display:none; 
+            opacity:0; 
+            transform: translateX(-10px); /* Slightly increased initial shift */
+            transition: all .3s cubic-bezier(0.165, 0.84, 0.44, 1); /* Smoother animation curve */
+
+            border:none; border-radius:10px; box-shadow:0 8px 20px rgba(0,0,0,0.2); /* Deeper shadow */
+        }
+        .dropdown-menu {
+            border:none; border-radius:10px; box-shadow:0 8px 20px rgba(0,0,0,0.2);
+            padding: 10px 0; /* Add padding inside dropdown */
+        }
+
+        @media (min-width: 992px){
+            .dropdown:hover > .dropdown-menu,
+            .dropdown-submenu:hover > .dropdown-menu { 
+                display:block; 
+                opacity:1; 
+                transform: translateX(0); 
+            }
+        }
+        .dropdown-item {
+            padding: 8px 20px;
+            font-size: 0.95rem;
+            color: #333;
+        }
+        .dropdown-item:hover { 
+            background: var(--accent); 
+            color: var(--primary); 
+            font-weight: 600; 
+        }
+        /* Mobile Fix - Cleaned up and consolidated */
+        @media (max-width: 991px){
+            .dropdown-menu { 
+                position:static !important; 
+                transform:none !important; 
+                opacity:1 !important; 
+                display:none; 
+                right: auto !important; 
+                margin-right: 0 !important;
+                border-left: 2px solid var(--accent); /* Mobile visual hierarchy */
+            }
+            .dropdown-menu.show { display:block !important; }
+            .dropdown-submenu > .dropdown-menu { 
+                margin-left: 1.5rem !important; /* Increased indent */
+                padding: 5px 0;
+            }
+        }
+        /* ================================================= */
+
+
+        /* --- Hero Section (The Top Image Area inside the tab) --- */
+        .hero {
+            background-size: cover !important;
+            background-position: center !important;
+            padding: 80px 20px; /* Reduced padding slightly */
+            text-align: center;
+            border-radius: 12px;
+            margin-top: 30px;
+            margin-bottom: 30px; /* Added bottom margin */
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15); /* Slightly stronger shadow */
+            min-height: 300px; /* Adjusted min-height */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(13, 27, 42, 0.65); /* Darker overlay for text contrast */
+            z-index: 1;
+        }
+        .hero h1, .hero p {
+            position: relative;
+            z-index: 2;
+            color: var(--accent);
+            text-shadow: 0 3px 12px rgba(0,0,0,0.95); /* Sharper text shadow */
+        }
+        .hero h1 { 
+            font-weight: 900; 
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+        .hero p.lead {
+             font-size: 1.25rem;
+             color: #ffda85; /* Lighter accent shade for lead text */
+        }
+        
+        /* --- Tabs --- */
+        .nav-tabs { 
+            border-bottom: 3px solid var(--primary); 
+            margin-bottom: 40px; /* Increased bottom margin */
+        }
+        .nav-tabs .nav-link {
+            border: 1px solid #ddd;
+            border-bottom-color: transparent;
+            margin-right: 5px;
+            background-color: #eee;
+            color: var(--primary);
+            font-weight: 700;
+            padding: 10px 20px;
+            transition: all 0.3s;
+            border-radius: 8px 8px 0 0;
+        }
+        .nav-tabs .nav-link.active {
+            color: var(--white); 
+            background-color: var(--primary); 
+            border-color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        .nav-tabs .nav-link:hover:not(.active) { background-color: #d8d8d8; }
+
+        /* --- Content Area --- */
+        .tab-pane {
+            background: var(--white);
+            padding: 40px; /* Increased padding */
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); /* Smoother shadow */
+        }
+        .section-header {
+            color: var(--primary);
+            font-weight: 800;
+            font-size: 1.8rem;
+            border-bottom: 3px solid var(--accent); /* Thicker accent line */
+            padding-bottom: 10px;
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+        ul { list-style: disc; padding-left: 25px; }
+        ul li { margin-bottom: 10px; line-height: 1.6; } /* Better line spacing */
+        p { line-height: 1.6; }
+
+        /* Image styling */
+        .content-img {
+            max-height: 380px; /* Slightly increased max-height */
+            width: auto;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+        /* Call to Action Button */
+        .btn-lg {
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            transition: background 0.3s, transform 0.2s;
+        }
+        .btn-lg:hover {
+            background: #ffdb7d !important;
+            transform: translateY(-2px);
+        }
+
+        /* --- Footer --- */
+        footer {
+            background: var(--primary);
+            color: #ddd; /* Lighter text color */
+            text-align: center;
+            padding: 50px 0; /* Increased padding */
+            margin-top: 80px;
+        }
+        footer a { color: var(--accent); text-decoration: none; transition: color 0.3s; }
+        footer a:hover { color: var(--white); text-decoration: underline; }
+
+        /* General utility */
+        .text-nowrap { white-space: nowrap; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="index.html">
+            <img src="rda.jpg" onerror="this.onerror=null; this.src='https://placehold.co/56x56/0d1b2a/ffc107?text=RDA';" alt="ROBO DRAFT logo" class="me-3">
+            <div>
+                <div style="color:var(--white); font-weight:800; font-size:1.25rem;">ROBO DRAFT AUTOMATION</div>
+                <div style="color:var(--accent); font-weight:600; font-size:.85rem; letter-spacing: 1px;">ROBUST FUTURE</div>
+            </div>
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navMenu">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="index.html#about">About</a></li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" id="productsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: var(--accent) !important;">
+                        Products
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="productsDropdown">
+
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">Toyo Actuators</a>
+                            <ul class="dropdown-menu">
+
+                                <li class="dropdown-submenu">
+                                    <a class="dropdown-item dropdown-toggle" href="#">Motorless Actuators</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="ball-screw.html">Ball Screw Type</a></li>
+                                        <li><a class="dropdown-item" href="belt-type.html">Belt Type</a></li>
+                                        <li><a class="dropdown-item" href="rod-type.html">Rod Type</a></li>
+                                        <li><a class="dropdown-item active" href="clean-room.html">Clean Room</a></li>
+                                        <li><a class="dropdown-item" href="rack-pinion.html">Rack & Pinion</a></li>
+                                        <li><a class="dropdown-item" href="multi-axis.html">Multi Axis Actuator</a></li>
+                                    </ul>
+                                </li>
+
+                                <li class="dropdown-submenu">
+                                    <a class="dropdown-item dropdown-toggle" href="#">Actuator with Motor</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="stepper-motor.html">Stepper Motor Actuator</a></li>
+                                        <li><a class="dropdown-item" href="servo-motor.html">Servo Motor Actuator</a></li>
+                                        <li><a class="dropdown-item" href="mini-cylinder.html">Mini Cylinder</a></li>
+                                        <li><a class="dropdown-item" href="gripper.html">Gripper</a></li>
+                                    </ul>
+                                </li>
+
+                                <li class="dropdown-submenu">
+                                    <a class="dropdown-item dropdown-toggle active" href="#">Robot</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="desktop-robot.html">Desktop Robot</a></li>
+                                        <li><a class="dropdown-item" href="cartesian-gantry-robot.html">Cartesian Robot</a></li>
+                                        <li><a class="dropdown-item" href="linear-motor-actuator.html">Linear Motor Actuator</a></li>
+                                        <li><a class="dropdown-item active" href="air-bearing.html">Air Bearing Linear Stage</a></li>
+                                        <li><a class="dropdown-item" href="cast-iron.html">Cast Iron Axis Stage</a></li>
+                                        <li><a class="dropdown-item" href="horizontal-z.html">Horizontal Z Axis Stage</a></li>
+                                        <li><a class="dropdown-item" href="alignment-stage.html">Alignment Stage</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">Pneumatics</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="index.html#iso-cylinder">ISO Cylinder</a></li>
+                                <li><a class="dropdown-item" href="index.html#compact-cylinder">Compact Cylinder</a></li>
+                                <li><a class="dropdown-item" href="index.html#solenoid-cylinder">Solenoid Valves</a></li>
+                                <li><a class="dropdown-item" href="index.html#pneumatic-accessories">Pneumatic Accessories</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Services
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="servicesDropdown">
+                        
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">SPM Machines</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="index.html#vision-inspection">Vision Inspection</a></li>
+                                <li><a class="dropdown-item" href="index.html#assembly-machines">Assembly Machines</a></li>
+                                <li><a class="dropdown-item" href="index.html#pick-place">Pick & Place</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">Electrical Panel</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="index.html#panel-designing">Panel Designing</a></li>
+                                <li><a class="dropdown-item" href="index.html#panel-wiring">Panel Wiring</a></li>
+                                <li><a class="dropdown-item" href="index.html#control-panel">Control Panel</a></li>
+                                <li><a class="dropdown-item" href="index.html#plc-support">PLC Support</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">Data Acquisition System</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="index.html#java-tech">Java Tech</a></li>
+                                <li><a class="dropdown-item" href="index.html#labview-tech">LabVIEW Tech</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="nav-item"><a class="nav-link" href="#contact-footer">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<main class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="fw-bold text-uppercase display-5" style="color:var(--primary);">
+            <i class="bi bi-mask me-2"></i> Toyo Cleanroom Actuators
+        </h1>
+        <p class="lead" style="color:var(--muted);">
+            High-Precision, Low-Particle Solutions for Critical Environments (ISO 14644-1 Compliant).
+        </p>
+    </div>
+
+    <ul class="nav nav-tabs justify-content-center" id="actuatorTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="gch-tab" data-bs-toggle="tab" data-bs-target="#gch" type="button" role="tab" aria-controls="gch" aria-selected="true">
+                <i class="bi bi-arrow-right-circle-fill me-1"></i> GCH Series (Ball Screw)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="ech-tab" data-bs-toggle="tab" data-bs-target="#ech" type="button" role="tab" aria-controls="ech" aria-selected="false">
+                <i class="bi bi-lightning-charge-fill me-1"></i> ECH Series (Electric)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="glch-tab" data-bs-toggle="tab" data-bs-target="#glch" type="button" role="tab" aria-controls="glch" aria-selected="false">
+                <i class="bi bi-box-seam-fill me-1"></i> GLCH Series (Sealed Ball Screw)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="glcb-tab" data-bs-toggle="tab" data-bs-target="#glcb" type="button" role="tab" aria-controls="glcb" aria-selected="false">
+                <i class="bi bi-sliders me-1"></i> GLCB Series (Belt Type)
+            </button>
+        </li>
+    </ul>
+    <div class="tab-content" id="actuatorTabsContent">
+
+        <!-- GCH Series Tab Content (Ball Screw Type) -->
+        <div class="tab-pane fade show active" id="gch" role="tabpanel" aria-labelledby="gch-tab">
+            
+            <div class="hero" style="background-image:url('https://www.toyorobotics.co/assets/images/GCH.png');">
+                <h1 class="text-uppercase">GCH Series – Built-in Linear Motion Guide Ball Screw Type</h1>
+                <p class="lead">Precision, reliability, and performance tailored for stringent cleanroom requirements.</p>
+            </div>
+            
+            <!--  -->
+
+            <h3 class="section-header"><i class="bi bi-info-circle-fill me-2"></i> GCH Series Overview</h3>
+            <div class="row g-5 align-items-center">
+                <div class="col-md-5 text-center">
+                    <img src="https://www.toyorobotics.co/assets/images/project/GCH.png" alt="GCH Cleanroom Actuator Diagram" class="img-fluid rounded shadow content-img" onerror="this.onerror=null; this.src='https://placehold.co/380x380/0d1b2a/ffc107?text=GCH+Cleanroom+Diagram';">
+                </div>
+                <div class="col-md-7">
+                    <p>The **Toyo GCH Series actuators** are known for their precision, reliability, and performance in various industrial applications, including semiconductor manufacturing. Cleanroom actuators must comply with ISO standards, particularly **ISO 14644-1**, which outlines the maximum permissible particle count in the air of a cleanroom environment. Actuators used in semiconductor cleanrooms are typically classified in accordance with ISO standards to ensure they meet the required cleanliness levels.</p>
+                    <p>Toyo GCH Series actuators are engineered to provide smooth and accurate motion control, making them well-suited for tasks that require precise positioning and control, such as wafer handling, equipment positioning, and other critical processes within semiconductor cleanrooms.</p>
+
+                    <h5 class="fw-semibold mt-4" style="color:var(--primary);"><i class="bi bi-check-circle-fill me-2" style="color:var(--accent);"></i> Key Features:</h5>
+                    <ul>
+                        <li>**Low Particle Emission**: Cleanroom actuators are designed to minimize particle generation to prevent contamination of the cleanroom environment.</li>
+                        <li>**Compliance with Cleanroom Standards**: These actuators adhere to specific cleanroom standards such as ISO 14644-1 to ensure that they meet the cleanliness and particle control requirements of the cleanroom environment.</li>
+                        <li>**Smooth and Precise Motion Control**: Cleanroom actuators provide accurate and smooth motion control, which is crucial for applications that require precision positioning and movement.</li>
+                        <li>**Sealed Design**: Cleanroom actuators feature sealed designs to prevent the ingress of contaminants and to maintain the cleanliness of the actuator itself.</li>
+                    </ul>
+                    <h5 class="fw-semibold mt-4" style="color:var(--primary);"><i class="bi bi-box-seam-fill me-2" style="color:var(--accent);"></i> Typical Applications:</h5>
+                    <ul>
+                        <li>Semi-conductor manufacturing</li>
+                        <li>Wafer piling and handling</li>
+                        <li>Wafer surface cleaning devices</li>
+                        <li>Food processing industry (where sterile environments are required)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ECH Series Tab Content (Electric Actuators) -->
+        <div class="tab-pane fade" id="ech" role="tabpanel" aria-labelledby="ech-tab">
+            <div class="hero" style="background-image:url('https://www.toyorobotics.co/assets/images/ECH.png');">
+                <h1 class="text-uppercase">ECH Series – High Speed, High Payload Electric Actuator</h1>
+                <p class="lead">Suitable for cleanroom applications with high demands on speed, payload, and stroke paths.</p>
+            </div>
+
+            <h3 class="section-header"><i class="bi bi-info-circle-fill me-2"></i> ECH Series Overview</h3>
+            <div class="row g-5 align-items-center">
+                <div class="col-md-5 text-center order-md-2">
+                    <img src="https://www.toyorobotics.co/assets/images/project/ECH.png" alt="ECH Cleanroom Actuator Diagram" class="img-fluid rounded shadow content-img" onerror="this.onerror=null; this.src='https://placehold.co/380x380/0d1b2a/ffc107?text=ECH+Cleanroom+Diagram';">
+                </div>
+                <div class="col-md-7 order-md-1">
+                    <p>In cleanroom environments, **electric actuators** play a crucial role in ensuring precision, quality, and cleanliness. We offer electric actuators that are suitable for cleanroom applications, with high demands on speed, payload, and stroke paths. Maximum payload of these electric actuators can be $150 \text{ Kg}$, and they have stroke paths of up to $1,500 \text{ mm}$. They are designed to minimize particle emissions and ingress of particles in cleanroom applications, adhering to stringent cleanliness requirements. Furthermore, the products are tested and classified in accordance with **ISO standards**, making them suitable for use in cleanrooms.</p>
+
+                    <h5 class="fw-semibold mt-4" style="color:var(--primary);"><i class="bi bi-check-circle-fill me-2" style="color:var(--accent);"></i> Key Features:</h5>
+                    <ul>
+                        <li>**Cleanroom compatibility**: These actuators are designed to minimize particle emissions and ingress, meeting the stringent cleanliness requirements of cleanroom environments.</li>
+                        <li>**Precision and repeatability**: Electric actuators offer high precision and repeatability, ensuring accuracy in positioning and movement within the cleanroom.</li>
+                        <li>**High speed and acceleration**: These actuators can achieve high speeds of up to $\text{1,600 mm/s}$, allowing for efficient and rapid movement within the cleanroom environment.</li>
+                        <li>**Stroke paths**: Electric actuators can provide stroke paths of up to $\text{1,500 mm}$, accommodating a wide range of motion requirements in cleanroom applications.</li>
+                        <li>**Compliance with standards**: The electric actuators are tested and classified in accordance with ISO standards, ensuring their suitability for use in cleanrooms and other controlled environments.</li>
+                    </ul>
+                    <h5 class="fw-semibold mt-4" style="color:var(--primary);"><i class="bi bi-box-seam-fill me-2" style="color:var(--accent);"></i> Typical Applications:</h5>
+                    <ul>
+                        <li>Semi-conductor manufacturing</li>
+                        <li>Wafer piling and handling</li>
+                        <li>Wafer surface cleaning device</li>
+                        <li>Food processing industry</li>
+                        <li>Optics and Photonics manufacturing</li>
+                        <li>Medical Device Manufacturing</li>
+                        <li>Pharmaceutical and Biotechnology applications</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- GLCH Series Tab Content (Highly Sealed Ball Screw Type) -->
+        <div class="tab-pane fade" id="glch" role="tabpanel" aria-labelledby="glch-tab">
+            <div class="hero" style="background-image:url('https://www.toyorobotics.co/assets/images/GLCH-ball-screw.png');">
+                <h1 class="text-uppercase">GLCH Series – Highly Sealed Cleanroom Ball Screw Actuator</h1>
+                <p class="lead">Achieving high cleanliness and high performance through superior dust emission prevention.</p>
+            </div>
+
+            <h3 class="section-header"><i class="bi bi-info-circle-fill me-2"></i> GLCH Series Overview</h3>
+            <div class="row g-5 align-items-center">
+                <div class="col-md-5 text-center">
+                    <img src="https://www.toyorobotics.co/assets/images/project/GL.png" alt="GLCH Actuator Diagram" class="img-fluid rounded shadow content-img" onerror="this.onerror=null; this.src='https://placehold.co/380x380/0d1b2a/ffc107?text=GLCH+Ball+Screw+Diagram';">
+                </div>
+                <div class="col-md-7">
+                    <p>The highly sealed structure of **GLCH series** achieves the dust emission prevention and improvement of the suction efficiency to establish both a high cleanliness degree and high performance. Industries like **semiconductor manufacturing** typically require a higher cleanliness level than medical device manufacturing due to the extremely dust-sensitive nature of delicate silicon wafers.</p>
+                    <p>Many of today’s cleanroom actuators employ **ball screws**, while other designs use belt drives or rack-and-pinion arrangements. Actuators designed for cleanroom environments are typically connected to **vacuum systems** in order to remove any particles generated during motion. In the vast majority of cleanroom applications involving actuators, positioning repeatability to $\text{50 μm}$ is acceptable.</p>
+                    <h5 class="fw-semibold mt-4" style="color:var(--primary);"><i class="bi bi-check-circle-fill me-2" style="color:var(--accent);"></i> Key Features:</h5>
+                    <ul>
+                        <li>**Sealing design** can prevent dirt and foreign objects from penetrating inside.</li>
+                        <li>Equipped with an **air fitting device**, which can keep the internal component clean.</li>
+                        <li>Clean type can support **cleanroom grade class 10** (examined by SGS) widely applied in semi-conductor industry and food supply chain.</li>
+                        <li>Effectively minimize the pollution of the actuator and working environment.</li>
+                    </ul>
+                    <h5 class="fw-semibold mt-4" style="color:var(--primary);"><i class="bi bi-box-seam-fill me-2" style="color:var(--accent);"></i> Typical Applications:</h5>
+                    <ul>
+                        <li>Semi-conductor manufacturing</li>
+                        <li>Wafer piling and handling</li>
+                        <li>Wafer surface cleaning device</li>
+                        <li>Food processing industry</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- GLCB Series Tab Content (Belt Type Actuators) -->
+        <div class="tab-pane fade" id="glcb" role="tabpanel" aria-labelledby="glcb-tab">
+            <div class="hero" style="background-image:url('https://www.toyorobotics.co/assets/images/GLCB-belt-type.png');">
+                <h1 class="text-uppercase">GLCB Series – Cleanroom Belt-Type Electric Actuators</h1>
+                <p class="lead">Utilizes a belt-driven mechanism with a sealed design for controlled environments.</p>
+            </div>
+
+            <h3 class="section-header"><i class="bi bi-info-circle-fill me-2"></i> GLCB Series Overview</h3>
+            <div class="row g-5 align-items-center">
+                <div class="col-md-5 text-center order-md-2">
+                    <img src="https://www.toyorobotics.co/assets/images/project/GLCB-series.png" alt="GLCB Cleanroom Actuator Diagram" class="img-fluid rounded shadow content-img" onerror="this.onerror=null; this.src='https://placehold.co/380x380/0d1b2a/ffc107?text=GLCB+Cleanroom+Diagram';">
+                </div>
+                <div class="col-md-7 order-md-1">
+                    <p>**Cleanroom belt-type electric actuators**, i.e., **GLCB series**, are specialized devices designed to be used in cleanroom environments where cleanliness and particle control are critical. These actuators utilize a belt-driven mechanism to convert electrical energy into linear motion, offering precise positioning and control while minimizing the risk of contamination.</p>
+                    <p>GLCB series actuators typically feature an **enclosed design** to prevent contamination from external sources. Sealed enclosures help protect the internal components from dust, debris, and other contaminants, ensuring reliable operation in cleanroom settings.</p>
+
+                    <h5 class="fw-semibold mt-4" style="color:var(--primary);"><i class="bi bi-check-circle-fill me-2" style="color:var(--accent);"></i> Key Features:</h5>
+                    <ul>
+                        <li>Typically connected to **vacuum systems** in order to remove any particles generated during motion.</li>
+                        <li>Provide specialized ports for quick connecting. This is for simple hookup to vacuum tubing.</li>
+                        <li>Effectively minimize the pollution of the actuator and working environment.</li>
+                        <li>Operation life is $\text{5000 km}$ when the product is using under specified conditions.</li>
+                    </ul>
+                    <h5 class="fw-semibold mt-4" style="color:var(--primary);"><i class="bi bi-box-seam-fill me-2" style="color:var(--accent);"></i> Typical Applications:</h5>
+                    <ul>
+                        <li>Semi-conductor manufacturing</li>
+                        <li>Wafer piling and handling</li>
+                        <li>Wafer surface cleaning device</li>
+                        <li>Food processing industry</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div> 
+    <div class="text-center mt-6 py-5 border-top border-bottom">
+        <h3 class="fw-bold" style="color:var(--primary);">Need a Customized Automation Solution?</h3>
+        <p class="lead mb-4" style="color:var(--muted);">
+            Our engineers are ready to help you select the ideal Toyo Actuator and integrate it seamlessly into your process.
+        </p>
+        <a href="#contact-footer" class="btn btn-lg fw-bold" style="background:var(--accent); color:var(--primary);">
+            <i class="bi bi-envelope-fill me-2"></i> Request a Quote
+        </a>
+    </div>
+    </main> 
+
+<footer id="contact-footer">
+    <div class="container text-center">
+        <h4 class="fw-bold mb-4 text-uppercase" style="color:var(--accent);">
+            <i class="bi bi-headset me-2"></i> Contact Robo Draft Automation
+        </h4>
+        <p class="mb-2">24, Vijaya Nagar, Mel Ayanambakkam,<br>Opp to Royal Club, Chennai - 600098.</p>
+        <p class="mb-4 lead">
+            <i class="bi bi-envelope-fill me-2"></i> Email: <a href="mailto:robodraftautomation@gmail.com">robodraftautomation@gmail.com</a>
+            &nbsp;|&nbsp;
+            <i class="bi bi-phone-fill me-2"></i> Phone: <a href="tel:+919999999999">+91 99999 99999</a>
+        </p>
+        <p class="text-white-50 small">&copy; <span id="current-year"></span> Robo Draft Automation. All rights reserved.</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // JavaScript to handle the nested dropdown functionality, especially on mobile
+    document.addEventListener("DOMContentLoaded", function(){
+        // Set current year in the footer
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // Handle nested dropdowns (dropdown-submenu)
+        document.querySelectorAll('.dropdown-submenu > a').forEach(function(element){
+            element.addEventListener('click', function(e){
+                e.preventDefault();
+                e.stopPropagation(); // Stop event from closing the main dropdown
+
+                let nextSibling = element.nextElementSibling;
+                
+                // Close all other open submenus at the same level
+                element.closest('.dropdown-menu').querySelectorAll('.dropdown-menu').forEach(function(menu){
+                    if(menu !== nextSibling){
+                        menu.classList.remove('show');
+                    }
+                });
+
+                // Toggle the current submenu
+                if (nextSibling && nextSibling.classList.contains('dropdown-menu')) {
+                    nextSibling.classList.toggle('show');
+                }
+            });
+        });
+
+        // Close submenus when clicking outside (mobile fix)
+        document.querySelectorAll('.dropdown-toggle').forEach(function(toggle){
+            toggle.addEventListener('hidden.bs.dropdown', function () {
+                this.closest('.dropdown').querySelectorAll('.dropdown-submenu > .dropdown-menu').forEach(function(menu){
+                    menu.classList.remove('show');
+                });
+            })
+        });
+    });
+</script>
+</body>
+</html>

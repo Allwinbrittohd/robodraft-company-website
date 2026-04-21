@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Robo Draft Automation | Multi Axis Actuators</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/jpeg" href="rda.jpg" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        /* Professional Color Palette & Typography */
+        :root {
+            --primary: #0d1b2a; /* Dark Navy for main elements */
+            --accent: #ffc107;  /* Yellow/Gold for highlights */
+            --muted: #555;      /* Darker grey for body text */
+            --light-bg: #f5f6f7; /* Very light grey background */
+            --white: #fff;
+        }
+        body { 
+            font-family: 'Poppins', 'Segoe UI', sans-serif; /* Slightly more modern font stack */
+            background: var(--light-bg); 
+            color: #222; 
+        }
+
+        /* --- Navbar Styles --- */
+        .navbar { 
+            background: var(--primary); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+        }
+        .navbar-brand img { 
+            height:56px; 
+            border-radius:6px; 
+            border:1px solid var(--accent); /* Logo highlight */
+            padding:2px; 
+        }
+        .navbar-nav .nav-link {
+            color: var(--white) !important; 
+            font-weight: 500; /* Adjusted for better readability */
+            margin: 0 8px; 
+            transition: color .3s ease-in-out;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .navbar-nav .nav-link:hover {
+            color: var(--accent) !important; 
+            text-shadow: 0 0 10px rgba(255,193,7,0.6);
+        }
+        /* Active link style inside the dropdown */
+        .dropdown-item.active {
+            background: var(--accent) !important; 
+            color: var(--primary) !important; 
+            font-weight: 600 !important;
+        }
+        
+        /* === Dropdown Submenu Fixes (LEFT side opening and stylish pop-out) === */
+        .dropdown-submenu { position:relative; }
+        .dropdown-submenu > .dropdown-menu {
+            top: 0; 
+            left: auto; 
+            right: 100%; 
+            margin-right: -1px; 
+            
+            display:none; 
+            opacity:0; 
+            transform: translateX(-10px); /* Slightly increased initial shift */
+            transition: all .3s cubic-bezier(0.165, 0.84, 0.44, 1); /* Smoother animation curve */
+
+            border:none; border-radius:10px; box-shadow:0 8px 20px rgba(0,0,0,0.2); /* Deeper shadow */
+        }
+        .dropdown-menu {
+            border:none; border-radius:10px; box-shadow:0 8px 20px rgba(0,0,0,0.2);
+            padding: 10px 0; /* Add padding inside dropdown */
+        }
+
+        @media (min-width: 992px){
+            .dropdown:hover > .dropdown-menu,
+            .dropdown-submenu:hover > .dropdown-menu { 
+                display:block; 
+                opacity:1; 
+                transform: translateX(0); 
+            }
+        }
+        .dropdown-item {
+            padding: 8px 20px;
+            font-size: 0.95rem;
+            color: #333;
+        }
+        .dropdown-item:hover { 
+            background: var(--accent); 
+            color: var(--primary); 
+            font-weight: 600; 
+        }
+        /* Mobile Fix - Cleaned up and consolidated */
+        @media (max-width: 991px){
+            .dropdown-menu { 
+                position:static !important; 
+                transform:none !important; 
+                opacity:1 !important; 
+                display:none; 
+                right: auto !important; 
+                margin-right: 0 !important;
+                border-left: 2px solid var(--accent); /* Mobile visual hierarchy */
+            }
+            .dropdown-menu.show { display:block !important; }
+            .dropdown-submenu > .dropdown-menu { 
+                margin-left: 1.5rem !important; /* Increased indent */
+                padding: 5px 0;
+            }
+        }
+        /* ================================================= */
+
+
+        /* --- Hero Section (The Top Image Area inside the tab) --- */
+        .hero {
+            background-size: cover !important;
+            background-position: center !important;
+            padding: 80px 20px; /* Reduced padding slightly */
+            text-align: center;
+            border-radius: 12px;
+            margin-top: 30px;
+            margin-bottom: 30px; /* Added bottom margin */
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15); /* Slightly stronger shadow */
+            min-height: 300px; /* Adjusted min-height */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(13, 27, 42, 0.65); /* Darker overlay for text contrast */
+            z-index: 1;
+        }
+        .hero h1, .hero p {
+            position: relative;
+            z-index: 2;
+            color: var(--accent);
+            text-shadow: 0 3px 12px rgba(0,0,0,0.95); /* Sharper text shadow */
+        }
+        .hero h1 { 
+            font-weight: 900; 
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+        .hero p.lead {
+             font-size: 1.25rem;
+             color: #ffda85; /* Lighter accent shade for lead text */
+        }
+        
+        /* --- Tabs --- */
+        .nav-tabs { 
+            border-bottom: 3px solid var(--primary); 
+            margin-bottom: 40px; /* Increased bottom margin */
+        }
+        .nav-tabs .nav-link {
+            border: 1px solid #ddd;
+            border-bottom-color: transparent;
+            margin-right: 5px;
+            background-color: #eee;
+            color: var(--primary);
+            font-weight: 700;
+            padding: 10px 20px;
+            transition: all 0.3s;
+            border-radius: 8px 8px 0 0;
+        }
+        .nav-tabs .nav-link.active {
+            color: var(--white); 
+            background-color: var(--primary); 
+            border-color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        .nav-tabs .nav-link:hover:not(.active) { background-color: #d8d8d8; }
+
+        /* --- Content Area --- */
+        .tab-content {
+            background: var(--white);
+            padding: 40px; /* Increased padding */
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); /* Smoother shadow */
+        }
+        .section-header {
+            color: var(--primary);
+            font-weight: 800;
+            font-size: 1.8rem;
+            border-bottom: 3px solid var(--accent); /* Thicker accent line */
+            padding-bottom: 10px;
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+        ul { list-style: disc; padding-left: 25px; }
+        ul li { margin-bottom: 10px; line-height: 1.6; } /* Better line spacing */
+        p { line-height: 1.6; }
+
+        /* Image styling */
+        .content-img {
+            max-height: 380px; /* Slightly increased max-height */
+            width: auto;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+        .application-card {
+            background: var(--light-bg);
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            transition: transform 0.3s ease-in-out;
+            min-height: 350px;
+            height: 100%; /* Ensure cards fill height in grid */
+            display: flex;
+            flex-direction: column;
+        }
+        .application-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        .application-card img {
+            max-height: 180px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border: 2px solid #ddd;
+        }
+        .application-card h5 {
+            flex-grow: 0;
+        }
+        .application-card p {
+            flex-grow: 1; /* Pushes content down, useful for aligning the bottom */
+        }
+
+        /* Call to Action Button */
+        .btn-lg {
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            transition: background 0.3s, transform 0.2s;
+        }
+        .btn-lg:hover {
+            background: #ffdb7d !important;
+            transform: translateY(-2px);
+        }
+
+        /* --- Footer --- */
+        footer {
+            background: var(--primary);
+            color: #ddd; /* Lighter text color */
+            text-align: center;
+            padding: 50px 0; /* Increased padding */
+            margin-top: 80px;
+        }
+        footer a { color: var(--accent); text-decoration: none; transition: color 0.3s; }
+        footer a:hover { color: var(--white); text-decoration: underline; }
+
+        /* General utility */
+        .text-nowrap { white-space: nowrap; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="index.html">
+            <img src="rda.jpg" onerror="this.onerror=null; this.src='https://placehold.co/56x56/0d1b2a/ffc107?text=RDA';" alt="ROBO DRAFT logo" class="me-3">
+            <div>
+                <div style="color:var(--white); font-weight:800; font-size:1.25rem;">ROBO DRAFT AUTOMATION</div>
+                <div style="color:var(--accent); font-weight:600; font-size:.85rem; letter-spacing: 1px;">ROBUST FUTURE</div>
+            </div>
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navMenu">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="index.html#about">About</a></li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" id="productsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: var(--accent) !important;">
+                        Products
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="productsDropdown">
+
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">Toyo Actuators</a>
+                            <ul class="dropdown-menu">
+
+                                <li class="dropdown-submenu">
+                                    <a class="dropdown-item dropdown-toggle" href="#">Motorless Actuators</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="ball-screw.html">Ball Screw Type</a></li>
+                                        <li><a class="dropdown-item" href="belt-actuators.html">Belt Type</a></li>
+                                        <li><a class="dropdown-item" href="rod-type.html">Rod Type</a></li>
+                                        <li><a class="dropdown-item" href="clean-room.html">Clean Room</a></li>
+                                        <li><a class="dropdown-item" href="rack-pinion.html">Rack & Pinion</a></li>
+                                        <li><a class="dropdown-item active" href="multi-axis.html">Multi Axis Actuator</a></li>
+                                    </ul>
+                                </li>
+
+                                <li class="dropdown-submenu">
+                                    <a class="dropdown-item dropdown-toggle" href="#">Actuator with Motor</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="index.html#stepper-motor">Stepper Motor Actuator</a></li>
+                                        <li><a class="dropdown-item" href="index.html#servo-motor">Servo Motor Actuator</a></li>
+                                        <li><a class="dropdown-item" href="index.html#mini-cylinder">Mini Cylinder</a></li>
+                                        <li><a class="dropdown-item" href="index.html#gripper">Gripper</a></li>
+                                    </ul>
+                                </li>
+
+                                <li class="dropdown-submenu">
+                                    <a class="dropdown-item dropdown-toggle" href="#">Robot</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="index.html#desktop-robot">Desktop Robot</a></li>
+                                        <li><a class="dropdown-item" href="index.html#cartesian-robot">Cartesian Robot</a></li>
+                                        <li><a class="dropdown-item" href="index.html#linear-motor-actuator">Linear Motor Actuator</a></li>
+                                        <li><a class="dropdown-item" href="index.html#air-bearing">Air Bearing Linear Stage</a></li>
+                                        <li><a class="dropdown-item" href="index.html#cast-iron">Cast Iron Axis Stage</a></li>
+                                        <li><a class="dropdown-item" href="index.html#horizontal-z">Horizontal Z Axis Stage</a></li>
+                                        <li><a class="dropdown-item" href="index.html#alignment-stage">Alignment Stage</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">Pneumatics</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="index.html#iso-cylinder">ISO Cylinder</a></li>
+                                <li><a class="dropdown-item" href="index.html#compact-cylinder">Compact Cylinder</a></li>
+                                <li><a class="dropdown-item" href="index.html#solenoid-cylinder">Solenoid Valves</a></li>
+                                <li><a class="dropdown-item" href="index.html#pneumatic-accessories">Pneumatic Accessories</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Services
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="servicesDropdown">
+                        
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">SPM Machines</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="index.html#vision-inspection">Vision Inspection</a></li>
+                                <li><a class="dropdown-item" href="index.html#assembly-machines">Assembly Machines</a></li>
+                                <li><a class="dropdown-item" href="index.html#pick-place">Pick & Place</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">Electrical Panel</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="index.html#panel-designing">Panel Designing</a></li>
+                                <li><a class="dropdown-item" href="index.html#panel-wiring">Panel Wiring</a></li>
+                                <li><a class="dropdown-item" href="index.html#control-panel">Control Panel</a></li>
+                                <li><a class="dropdown-item" href="index.html#plc-support">PLC Support</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">Data Acquisition System</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="index.html#java-tech">Java Tech</a></li>
+                                <li><a class="dropdown-item" href="index.html#labview-tech">LabVIEW Tech</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="nav-item"><a class="nav-link" href="#contact-footer">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<main class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="fw-bold text-uppercase display-5" style="color:var(--primary);">
+            <i class="bi bi-robot me-2"></i> Multi Axis Actuators (Cartesian Robots)
+        </h1>
+        <p class="lead" style="color:var(--muted);">
+            Versatile XY, XYZ Systems for Precision Positioning and Automation Tasks.
+        </p>
+    </div>
+
+    <!-- Tab Navigation for the three series -->
+    <ul class="nav nav-tabs justify-content-center" id="actuatorTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="xygt-tab" data-bs-toggle="tab" data-bs-target="#xygt" type="button" role="tab" aria-controls="xygt" aria-selected="true">
+                <i class="bi bi-box me-1"></i> XYGT Series (LM Guide)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="xyth-tab" data-bs-toggle="tab" data-bs-target="#xyth" type="button" role="tab" aria-controls="xyth" aria-selected="false">
+                <i class="bi bi-nut me-1"></i> XYTH Series (Ball Screw)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="xytb-tab" data-bs-toggle="tab" data-bs-target="#xytb" type="button" role="tab" aria-controls="xytb" aria-selected="false">
+                <i class="bi bi-bezier me-1"></i> XYTB Series (Belt Type)
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="actuatorTabsContent">
+
+        <!-- 1. XYGT Series (Built-in LM Guide Cartesian robot) Tab Content - UPDATED with specific images -->
+        <div class="tab-pane fade show active" id="xygt" role="tabpanel" aria-labelledby="xygt-tab">
+            
+            <div class="hero" style="background-image:url('https://www.toyorobotics.co/assets/images/cartesian-xygt.png');">
+                <h1 class="text-uppercase">XYGT Series – Built-in LM Guide Cartesian Robot</h1>
+                <p class="lead">Ideal for precision, speed, and movement in Cartesian coordinates (X, Y, Z).</p>
+            </div>
+            
+            <h3 class="section-header"><i class="bi bi-info-circle-fill me-2"></i> Overview: Built-in LM Guide Cartesian Robot</h3>
+            <div class="row g-5 align-items-center">
+                <div class="col-md-7">
+                    <p>Cartesian robots, also known as linear robots, are a type of industrial robot that possess a unique design. Circular motion and interpolation motion are possible when using them with a multi-axis controller. The most common combinations are Gantry type, Arm type, and XY type.</p>
+                    <p>With the help of this multi-axis design like XY, XYZ and/or adding a rotation axis for application is possible. These multi-axis systems change the movement from one dimension to two or three dimensions. The **XYGT series** of cartesian systems uses a built-in guideway ball screw mechanism for its precise movements.</p>
+
+                    <h5 class="fw-semibold mt-4" style="color:var(--primary);"><i class="bi bi-check-circle-fill me-2" style="color:var(--accent);"></i> Key Features:</h5>
+                    <ul>
+                        <li>**Linear Motion**: They move solely in a straight line, making them ideal for applications that require precision and speed.</li>
+                        <li>**Cartesian Coordinates**: Their motion is controlled using Cartesian coordinates ($\text{X, Y, Z}$), allowing for precise positioning and movement.</li>
+                        <li>**Robustness**: Cartesian robots are often designed for heavy-duty use and can withstand harsh industrial environments.</li>
+                        <li>**Payload Capacity**: They are capable of handling heavy payloads, making them suitable for various industrial applications.</li>
+                    </ul>
+                </div>
+                <div class="col-md-5 text-center">
+                    <!-- New specific structure image for XYGT -->
+                    <img src="https://www.toyorobotics.co/assets/images/project/cartesian-XYGT.png" alt="XYGT Series Built-in LM Guide Structure" class="img-fluid rounded shadow content-img" onerror="this.onerror=null; this.src='https://placehold.co/380x380/0d1b2a/ffc107?text=XYGT+Robot+Diagram';">
+                </div>
+            </div>
+
+            <h3 class="section-header"><i class="bi bi-box-seam-fill me-2"></i> Detailed XYGT Applications</h3>
+            <div class="row g-4">
+                
+                <div class="col-lg-6">
+                    <div class="application-card">
+                        <!-- New specific image for CCD Machine Vision Inspection -->
+                        <img src="https://www.toyorobotics.co/assets/images/project/ccd-machine.jpg" alt="CCD Machine Vision Inspection" class="img-fluid w-100 mb-3" onerror="this.onerror=null; this.src='https://placehold.co/400x180/102b46/ffc107?text=CCD+Inspection+Example';">
+                        <h5 class="fw-bold" style="color:var(--primary);">1. CCD Machine Vision Inspection</h5>
+                        <p>Automated Optical Inspection (AOI) for PCB using an external CCD camera attached to the Z axis, providing high-speed, detailed examination.</p>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="application-card">
+                        <!-- New specific image for PCB Laser Engraving -->
+                        <img src="https://www.toyorobotics.co/assets/images/project/pcb-laser-engraving.jpg" alt="PCB Laser Engraving" class="img-fluid w-100 mb-3" onerror="this.onerror=null; this.src='https://placehold.co/400x180/102b46/ffc107?text=Laser+Engraving+Example';">
+                        <h5 class="fw-bold" style="color:var(--primary);">2. PCB Laser Engraving</h5>
+                        <p>High speed dual drive laser engraving of LCD panels and other large-sized work pieces, requiring coordinated motion across multiple axes.</p>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="application-card">
+                        <!-- New specific image for Pick and Place for Small Sized Pieces -->
+                        <img src="https://www.toyorobotics.co/assets/images/project/pick-and-place-for-small-sized-workpiece.jpg" alt="Pick and Place" class="img-fluid w-100 mb-3" onerror="this.onerror=null; this.src='https://placehold.co/400x180/102b46/ffc107?text=Pick+&+Place+Example';">
+                        <h5 class="fw-bold" style="color:var(--primary);">3. Pick and Place for Small Sized Pieces</h5>
+                        <p>Efficient handling and placement of small parts using a single axis sliding table integrated within the $\text{3-axis}$ linear system.</p>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="application-card">
+                        <!-- New specific image for Dispensing for Small Sized Workpieces -->
+                        <img src="https://www.toyorobotics.co/assets/images/project/dispensing-for-small-sized-workpieces.jpg" alt="Dispensing" class="img-fluid w-100 mb-3" onerror="this.onerror=null; this.src='https://placehold.co/400x180/102b46/ffc107?text=Dispensing+Example';">
+                        <h5 class="fw-bold" style="color:var(--primary);">4. Dispensing for Small Sized Workpieces</h5>
+                        <p>A cost-competitive solution for precise dispensing applications, suitable for both on and off-production line use, ensuring accuracy.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. XYTH Series (Ball Screw Type Cartesian robot) Tab Content - UPDATED with specific images -->
+        <div class="tab-pane fade" id="xyth" role="tabpanel" aria-labelledby="xyth-tab">
+            
+            <div class="hero" style="background-image:url('https://www.toyorobotics.co/assets/images/project/cartesian-xyth.png');">
+                <h1 class="text-uppercase">XYTH Series – Ball Screw Type Cartesian Robot</h1>
+                <p class="lead">Engineered for high precision, accuracy, and robust performance in multi-directional movement.</p>
+            </div>
+            
+            <h3 class="section-header"><i class="bi bi-nut-fill me-2"></i> Overview: Ball Screw Type Cartesian Robot</h3>
+            <div class="row g-5 align-items-center">
+                <div class="col-md-7 order-md-2">
+                    <p>Multi-axis actuators are electromechanical devices that convert electrical signals into mechanical motion, enabling precise movement in multiple directions or axes. They consist of motors, gears, and linear or rotary mechanisms that work together to provide smooth and accurate motion.</p>
+                    <p>These actuators are ideal for tasks that require simultaneous movement in multiple directions, such as 3D printing, CNC machining, and robotic arm motion control. The **XYTH series** is highly customizable, allowing combinations like $\text{XY, XYZ}$ and/or adding a rotation axis. It can also be configured to use dual $\text{Y-axis}$ or dual $\text{Z-axis}$ for enhanced rigidity and load distribution.</p>
+
+                    <h5 class="fw-semibold mt-4" style="color:var(--primary);"><i class="bi bi-check-circle-fill me-2" style="color:var(--accent);"></i> Key Features:</h5>
+                    <ul>
+                        <li>**Precision**: High precision and accuracy, achieved through the Ball Screw mechanism.</li>
+                        <li>**Design**: Compact design for reduced space requirements in integrated systems.</li>
+                        <li>**Performance**: High torque and force capabilities for demanding applications.</li>
+                        <li>**Stability**: Low backlash and high stiffness ensuring excellent repeatability.</li>
+                        <li>**Environment**: Ability to operate effectively in harsh industrial environments.</li>
+                        <li>**Customization**: Highly customizable for specific applications and industries.</li>
+                    </ul>
+                </div>
+                <div class="col-md-5 order-md-1 text-center">
+                    <!-- New specific structure image for XYTH -->
+                    <img src="https://www.toyorobotics.co/assets/images/project/cartesianXYTH.png" alt="XYTH Ball Screw Mechanism" class="img-fluid rounded shadow content-img" onerror="this.onerror=null; this.src='https://placehold.co/380x380/0d1b2a/ffc107?text=XYTH+Robot+Diagram';">
+                </div>
+            </div>
+
+            <h3 class="section-header"><i class="bi bi-box-seam-fill me-2"></i> Detailed XYTH Applications</h3>
+            <div class="row g-4">
+                
+                <div class="col-lg-6">
+                    <div class="application-card">
+                        <!-- Reusing P&P image -->
+                        <img src="https://www.toyorobotics.co/assets/images/project/pick-and-place-for-small-sized-workpiece.jpg" alt="Pick and Place" class="img-fluid w-100 mb-3" onerror="this.onerror=null; this.src='https://placehold.co/400x180/102b46/ffc107?text=Pick+&+Place+Example';">
+                        <h5 class="fw-bold" style="color:var(--primary);">1. Pick and Place for Small Sized Pieces</h5>
+                        <p>Facilitates efficient pick and place operations for small parts using a 3-axis linear system combined with a single axis sliding table. High precision ensures accurate component handling.</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="application-card">
+                        <!-- New specific image for Dispensing -->
+                        <img src="https://www.toyorobotics.co/assets/images/project/dispensing-for-small-sized-workpieces.jpg" alt="Dispensing" class="img-fluid w-100 mb-3" onerror="this.onerror=null; this.src='https://placehold.co/400x180/102b46/ffc107?text=Dispensing+Example';">
+                        <h5 class="fw-bold" style="color:var(--primary);">2. Dispensing for Small Sized Workpieces</h5>
+                        <p>Provides a precise and reliable platform for dispensing applications, suitable for both dedicated and flexible production lines, leveraging the ball screw's accuracy.</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="application-card">
+                        <!-- New specific image for Surface Treatment -->
+                        <img src="https://www.toyorobotics.co/assets/images/project/surface-treatment.jpg" alt="Surface Treatment" class="img-fluid w-100 mb-3" onerror="this.onerror=null; this.src='https://placehold.co/400x180/102b46/ffc107?text=Surface+Treatment+Example';">
+                        <h5 class="fw-bold" style="color:var(--primary);">3. Surface Treatment</h5>
+                        <p>The highly stable Cartesian system is perfectly suited for surface treatment applications like cleaning, coating, and polishing, requiring smooth, consistent movement.</p>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="application-card">
+                        <!-- New specific image for Screw Tightening -->
+                        <img src="https://www.toyorobotics.co/assets/images/project/screw-tightening.jpg" alt="Screw Tightening" class="img-fluid w-100 mb-3" onerror="this.onerror=null; this.src='https://placehold.co/400x180/102b46/ffc107?text=Screw+Tightening+Example';">
+                        <h5 class="fw-bold" style="color:var(--primary);">4. Screw Tightening</h5>
+                        <p>Suitable for automated screw and bolt tightening, often integrated with a desktop robot setup for complex assembly tasks where repeatability is crucial.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. XYTB Series (Belt Type Cartesian robot) Tab Content - Verified/Retained -->
+        <div class="tab-pane fade" id="xytb" role="tabpanel" aria-labelledby="xytb-tab">
+            
+            <div class="hero" style="background-image:url('https://www.toyorobotics.co/assets/images/project/cartesian-XYTB.png');">
+                <h1 class="text-uppercase">XYTB Series – Belt Type Cartesian Robot</h1>
+                <p class="lead">Cost-effective and high-speed multi-axis motion using a robust belt and pulley system.</p>
+            </div>
+            
+            <h3 class="section-header"><i class="bi bi-bezier2 me-2"></i> Overview: Belt Type Cartesian Robot</h3>
+            <div class="row g-5 align-items-center">
+                <div class="col-md-7">
+                    <p>Cartesian robots are a design of **2 and 3 axis multi-axis actuators** achieved through the multiple combinations of single axis actuators. This approach maximizes the application possibilities of movement and minimizes the time of assembly while maintaining consistency of appearance.</p>
+                    <p>The **XYTB series** is a combination of two or more belt type actuators. It utilizes a belt and pulley system to convert electrical energy into mechanical motion. This mechanism provides a compact design with high power density, making it suitable for a wide range of applications, including industrial automation, robotics, and medical devices.</p>
+
+                    <h5 class="fw-semibold mt-4" style="color:var(--primary);"><i class="bi bi-check-circle-fill me-2" style="color:var(--accent);"></i> Key Features:</h5>
+                    <ul>
+                        <li>**Cost-Effective**: Low cost compared to vertical jointed (articulated) robots.</li>
+                        <li>**Design**: Ingenious mechanical design resulting in high rigidity for reducing vibration and deformation.</li>
+                        <li>**Flexibility**: Allows for multiple combinations of single axis actuators to meet unique path requirements.</li>
+                        <li>**Maintenance**: High resistance to dirt and debris, offering reliable operation in less controlled environments.</li>
+                    </ul>
+                </div>
+                <div class="col-md-5 text-center">
+                    <img src="https://www.toyorobotics.co/assets/images/project/cartesian-XYTB.png" alt="XYTB Belt Type Cartesian Robot Structure" class="img-fluid rounded shadow content-img" onerror="this.onerror=null; this.src='https://placehold.co/380x380/0d1b2a/ffc107?text=XYTB+Robot+Diagram';">
+                </div>
+            </div>
+
+            <h3 class="section-header"><i class="bi bi-gear-wide-connected me-2"></i> Detailed XYTB Applications</h3>
+            <!-- 2x2 Grid for the 4 specific applications -->
+            <div class="row g-4">
+                
+                <div class="col-lg-6">
+                    <div class="application-card">
+                        <img src="https://www.toyorobotics.co/assets/images/project/pick-and-place-for-small-sized-workpiece.jpg" alt="Pick and Place" class="img-fluid w-100 mb-3" onerror="this.onerror=null; this.src='https://placehold.co/400x180/102b46/ffc107?text=Pick+&+Place+Example';">
+                        <h5 class="fw-bold" style="color:var(--primary);">1. Pick and Place for Small Sized Pieces</h5>
+                        <p>Utilizing the high speed of the belt drive, the XYTB system quickly and accurately moves and places small components, improving cycle time in assembly and packaging lines.</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="application-card">
+                        <img src="https://www.toyorobotics.co/assets/images/project/dispensing-for-small-sized-workpieces.jpg" alt="Dispensing" class="img-fluid w-100 mb-3" onerror="this.onerror=null; this.src='https://placehold.co/400x180/102b46/ffc107?text=Dispensing+Example';">
+                        <h5 class="fw-bold" style="color:var(--primary);">2. Dispensing for Small Sized Workpieces</h5>
+                        <p>The $\text{XYTB}$ series offers a precise and cost-effective solution for fluid dispensing (e.g., glue, sealant, paste) on small workpieces, ensuring uniform application.</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="application-card">
+                        <img src="https://www.toyorobotics.co/assets/images/project/surface-treatment.jpg" alt="Surface Treatment" class="img-fluid w-100 mb-3" onerror="this.onerror=null; this.src='https://placehold.co/400x180/102b46/ffc107?text=Surface+Treatment+Example';">
+                        <h5 class="fw-bold" style="color:var(--primary);">3. Surface Treatment</h5>
+                        <p>Its robustness and large work area capability make the Cartesian system suitable for various surface treatment processes like coating, cleaning, and light sanding over extended areas.</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="application-card">
+                        <img src="https://www.toyorobotics.co/assets/images/project/screw-tightening.jpg" alt="Screw Tightening" class="img-fluid w-100 mb-3" onerror="this.onerror=null; this.src='https://placehold.co/400x180/102b46/ffc107?text=Screw+Tightening+Example';">
+                        <h5 class="fw-bold" style="color:var(--primary);">4. Screw Tightening</h5>
+                        <p>The $\text{XYTB}$ provides the required $\text{X/Y}$ movement for automated screw feeding and tightening processes in assembly, reducing manual labor and ensuring consistent torque.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div> 
+    
+    <div class="text-center mt-6 py-5 border-top border-bottom">
+        <h3 class="fw-bold" style="color:var(--primary);">Looking for the Right Multi-Axis Solution?</h3>
+        <p class="lead mb-4" style="color:var(--muted);">
+            Whether you need the precision of Ball Screw (XYTH) or the speed of Belt Type (XYTB), we have the perfect Cartesian system for your automation needs.
+        </p>
+        <a href="#contact-footer" class="btn btn-lg fw-bold" style="background:var(--accent); color:var(--primary);">
+            <i class="bi bi-envelope-fill me-2"></i> Talk to an Expert
+        </a>
+    </div>
+</main> 
+
+<footer id="contact-footer">
+    <div class="container text-center">
+        <h4 class="fw-bold mb-4 text-uppercase" style="color:var(--accent);">
+            <i class="bi bi-headset me-2"></i> Contact Robo Draft Automation
+        </h4>
+        <p class="mb-2">24, Vijaya Nagar, Mel Ayanambakkam,<br>Opp to Royal Club, Chennai - 600098.</p>
+        <p class="mb-4 lead">
+            <i class="bi bi-envelope-fill me-2"></i> Email: <a href="mailto:robodraftautomation@gmail.com">robodraftautomation@gmail.com</a>
+            &nbsp;|&nbsp;
+            <i class="bi bi-phone-fill me-2"></i> Phone: <a href="tel:+919999999999">+91 99999 99999</a>
+        </p>
+        <p class="text-white-50 small">&copy; <span id="current-year"></span> Robo Draft Automation. All rights reserved.</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // JavaScript to handle the nested dropdown functionality, especially on mobile
+    document.addEventListener("DOMContentLoaded", function(){
+        // Set current year in the footer
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // Handle nested dropdowns (dropdown-submenu)
+        document.querySelectorAll('.dropdown-submenu > a').forEach(function(element){
+            element.addEventListener('click', function(e){
+                e.preventDefault();
+                e.stopPropagation(); // Stop event from closing the main dropdown
+
+                let nextSibling = element.nextElementSibling;
+                
+                // Close all other open submenus at the same level
+                element.closest('.dropdown-menu').querySelectorAll('.dropdown-menu').forEach(function(menu){
+                    if(menu !== nextSibling){
+                        menu.classList.remove('show');
+                    }
+                });
+
+                // Toggle the current submenu
+                if (nextSibling && nextSibling.classList.contains('dropdown-menu')) {
+                    nextSibling.classList.toggle('show');
+                }
+            });
+        });
+
+        // Close submenus when clicking outside (mobile fix)
+        document.querySelectorAll('.dropdown-toggle').forEach(function(toggle){
+            toggle.addEventListener('hidden.bs.dropdown', function () {
+                this.closest('.dropdown').querySelectorAll('.dropdown-submenu > .dropdown-menu').forEach(function(menu){
+                    menu.classList.remove('show');
+                });
+            })
+        });
+    });
+</script>
+</body>
+</html>

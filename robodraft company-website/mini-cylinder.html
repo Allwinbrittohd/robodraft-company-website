@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Robo Draft Automation | Mini Cylinders</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/jpeg" href="rda.jpg" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        /* Professional Color Palette & Typography */
+        :root {
+            --primary: #0d1b2a; /* Dark Navy for main elements */
+            --accent: #ffc107;  /* Yellow/Gold for highlights */
+            --muted: #555;      /* Darker grey for body text */
+            --light-bg: #f5f6f7; /* Very light grey background */
+            --white: #fff;
+        }
+        body { 
+            font-family: 'Poppins', 'Segoe UI', sans-serif; /* Slightly more modern font stack */
+            background: var(--light-bg); 
+            color: #222; 
+        }
+
+        /* --- Navbar Styles --- */
+        .navbar { 
+            background: var(--primary); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+        }
+        .navbar-brand img { 
+            height:56px; 
+            border-radius:6px; 
+            border:1px solid var(--accent); /* Logo highlight */
+            padding:2px; 
+        }
+        .navbar-nav .nav-link {
+            color: var(--white) !important; 
+            font-weight: 500; /* Adjusted for better readability */
+            margin: 0 8px; 
+            transition: color .3s ease-in-out;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .navbar-nav .nav-link:hover {
+            color: var(--accent) !important; 
+            text-shadow: 0 0 10px rgba(255,193,7,0.6);
+        }
+        /* Active link style inside the dropdown */
+        .dropdown-item.active {
+            background: var(--accent) !important; 
+            color: var(--primary) !important; 
+            font-weight: 600 !important;
+        }
+        
+        /* === Dropdown Submenu Fixes (LEFT side opening and stylish pop-out) === */
+        .dropdown-submenu { position:relative; }
+        .dropdown-submenu > .dropdown-menu {
+            top: 0; 
+            left: auto; 
+            right: 100%; 
+            margin-right: -1px; 
+            
+            display:none; 
+            opacity:0; 
+            transform: translateX(-10px); /* Slightly increased initial shift */
+            transition: all .3s cubic-bezier(0.165, 0.84, 0.44, 1); /* Smoother animation curve */
+
+            border:none; border-radius:10px; box-shadow:0 8px 20px rgba(0,0,0,0.2); /* Deeper shadow */
+        }
+        .dropdown-menu {
+            border:none; border-radius:10px; box-shadow:0 8px 20px rgba(0,0,0,0.2);
+            padding: 10px 0; /* Add padding inside dropdown */
+        }
+
+        @media (min-width: 992px){
+            .dropdown:hover > .dropdown-menu,
+            .dropdown-submenu:hover > .dropdown-menu { 
+                display:block; 
+                opacity:1; 
+                transform: translateX(0); 
+            }
+        }
+        .dropdown-item {
+            padding: 8px 20px;
+            font-size: 0.95rem;
+            color: #333;
+        }
+        .dropdown-item:hover { 
+            background: var(--accent); 
+            color: var(--primary); 
+            font-weight: 600; 
+        }
+        /* Mobile Fix - Cleaned up and consolidated */
+        @media (max-width: 991px){
+            .dropdown-menu { 
+                position:static !important; 
+                transform:none !important; 
+                opacity:1 !important; 
+                display:none; 
+                right: auto !important; 
+                margin-right: 0 !important;
+                border-left: 2px solid var(--accent); /* Mobile visual hierarchy */
+            }
+            .dropdown-menu.show { display:block !important; }
+            .dropdown-submenu > .dropdown-menu { 
+                margin-left: 1.5rem !important; /* Increased indent */
+                padding: 5px 0;
+            }
+        }
+        /* ================================================= */
+
+
+        /* --- Hero Section (The Top Image Area inside the tab) --- */
+        .hero {
+            background-size: cover !important;
+            background-position: center !important;
+            padding: 80px 20px; /* Reduced padding slightly */
+            text-align: center;
+            border-radius: 12px;
+            margin-top: 30px;
+            margin-bottom: 30px; /* Added bottom margin */
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15); /* Slightly stronger shadow */
+            min-height: 300px; /* Adjusted min-height */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(13, 27, 42, 0.65); /* Darker overlay for text contrast */
+            z-index: 1;
+        }
+        .hero h1, .hero p {
+            position: relative;
+            z-index: 2;
+            color: var(--accent);
+            text-shadow: 0 3px 12px rgba(0,0,0,0.95); /* Sharper text shadow */
+        }
+        .hero h1 { 
+            font-weight: 900; 
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+        .hero p.lead {
+             font-size: 1.25rem;
+             color: #ffda85; /* Lighter accent shade for lead text */
+        }
+        
+        /* Individual Hero Styles based on image provided */
+        .hero-csg { background-image: url('https://www.toyorobotics.co/assets/images/csg.png'); }
+        .hero-cs { background-image: url('https://www.toyorobotics.co/assets/images/CS-Miniature.png'); }
+        .hero-csgaz { background-image: url('https://www.toyorobotics.co/assets/images/CSGAZ.png'); }
+
+        
+        /* --- Tabs (Uses Nav-Tabs Styling) --- */
+        .nav-tabs { 
+            border-bottom: 3px solid var(--primary); 
+            margin-bottom: 40px; /* Increased bottom margin */
+        }
+        .nav-tabs .nav-link {
+            border: 1px solid #ddd;
+            border-bottom-color: transparent;
+            margin-right: 5px;
+            background-color: #eee;
+            color: var(--primary);
+            font-weight: 700;
+            padding: 10px 20px;
+            transition: all 0.3s;
+            border-radius: 8px 8px 0 0;
+        }
+        .nav-tabs .nav-link.active {
+            color: var(--white); 
+            background-color: var(--primary); /* Active tab is Dark Navy */
+            border-color: var(--primary);
+            border-bottom-color: var(--primary); /* Hides the bottom border for active tab */
+        }
+        .nav-tabs .nav-link:hover:not(.active) { background-color: #d8d8d8; }
+
+        /* --- Content Area --- */
+        .tab-pane {
+            background: var(--white);
+            padding: 40px; /* Increased padding */
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); /* Smoother shadow */
+        }
+        .section-header {
+            color: var(--primary);
+            font-weight: 800;
+            font-size: 1.8rem;
+            border-bottom: 3px solid var(--accent); /* Thicker accent line */
+            padding-bottom: 10px;
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+        ul { list-style: disc; padding-left: 25px; }
+        ul li { margin-bottom: 10px; line-height: 1.6; } /* Better line spacing */
+        p { line-height: 1.6; }
+
+        /* Image styling */
+        .content-img {
+            max-height: 380px; /* Slightly increased max-height */
+            width: auto;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+        .product-image-container {
+            border: 2px solid var(--accent);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .product-image-container img { width: 100%; height: auto; border-radius: 8px; max-height: 400px; object-fit: contain; }
+
+        /* Application list */
+        .list-unstyled li {
+            font-weight: 500;
+            margin-right: 20px;
+            margin-bottom: 15px !important;
+            font-size: 1.05rem;
+            color: var(--primary);
+        }
+        .list-unstyled li i {
+            color: var(--accent);
+        }
+
+
+        /* Call to Action Button */
+        .btn-lg {
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            transition: background 0.3s, transform 0.2s;
+        }
+        .btn-lg:hover {
+            background: #ffdb7d !important;
+            transform: translateY(-2px);
+        }
+
+        /* --- Footer --- */
+        footer {
+            background: var(--primary);
+            color: #ddd; /* Lighter text color */
+            text-align: center;
+            padding: 50px 0; /* Increased padding */
+            margin-top: 80px;
+        }
+        footer a { color: var(--accent); text-decoration: none; transition: color 0.3s; }
+        footer a:hover { color: var(--white); text-decoration: underline; }
+
+        /* General utility */
+        .text-nowrap { white-space: nowrap; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="index.html">
+            <img src="rda.jpg" onerror="this.onerror=null; this.src='https://placehold.co/56x56/0d1b2a/ffc107?text=RDA';" alt="ROBO DRAFT logo" class="me-3">
+            <div>
+                <div style="color:var(--white); font-weight:800; font-size:1.25rem;">ROBO DRAFT AUTOMATION</div>
+                <div style="color:var(--accent); font-weight:600; font-size:.85rem; letter-spacing: 1px;">ROBUST FUTURE</div>
+            </div>
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navMenu">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="index.html#about">About</a></li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" id="productsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: var(--accent) !important;">
+                        Products
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="productsDropdown">
+
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">Toyo Actuators</a>
+                            <ul class="dropdown-menu">
+
+                                <li class="dropdown-submenu">
+                                    <a class="dropdown-item dropdown-toggle" href="#">Motorless Actuators</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="ball-screw.html">Ball Screw Type</a></li>
+                                        <li><a class="dropdown-item" href="belt-actuators.html">Belt Type</a></li>
+                                        <li><a class="dropdown-item" href="rod-type.html">Rod Type</a></li>
+                                        <li><a class="dropdown-item" href="clean-room.html">Clean Room</a></li>
+                                        <li><a class="dropdown-item" href="rack-pinion.html">Rack & Pinion</a></li>
+                                        <li><a class="dropdown-item" href="index.html#multi-axis">Multi Axis Actuator</a></li>
+                                    </ul>
+                                </li>
+
+                                <li class="dropdown-submenu">
+                                    <a class="dropdown-item dropdown-toggle" href="#">Actuator with Motor</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="index.html#stepper-motor">Stepper Motor Actuator</a></li>
+                                        <li><a class="dropdown-item" href="servo-motor.html">Servo Motor Actuator</a></li>
+                                        <li><a class="dropdown-item active" href="#">Mini Cylinder</a></li>
+                                        <li><a class="dropdown-item" href="index.html#gripper">Gripper</a></li>
+                                    </ul>
+                                </li>
+
+                                <li class="dropdown-submenu">
+                                    <a class="dropdown-item dropdown-toggle" href="#">Robot</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="index.html#desktop-robot">Desktop Robot</a></li>
+                                        <li><a class="dropdown-item" href="index.html#cartesian-robot">Cartesian Robot</a></li>
+                                        <li><a class="dropdown-item" href="index.html#linear-motor-actuator">Linear Motor Actuator</a></li>
+                                        <li><a class="dropdown-item" href="index.html#air-bearing">Air Bearing Linear Stage</a></li>
+                                        <li><a class="dropdown-item" href="index.html#cast-iron">Cast Iron Axis Stage</a></li>
+                                        <li><a class="dropdown-item" href="index.html#horizontal-z">Horizontal Z Axis Stage</a></li>
+                                        <li><a class="dropdown-item" href="index.html#alignment-stage">Alignment Stage</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">Pneumatics</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="index.html#iso-cylinder">ISO Cylinder</a></li>
+                                <li><a class="dropdown-item" href="index.html#compact-cylinder">Compact Cylinder</a></li>
+                                <li><a class="dropdown-item" href="index.html#solenoid-cylinder">Solenoid Valves</a></li>
+                                <li><a class="dropdown-item" href="index.html#pneumatic-accessories">Pneumatic Accessories</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Services
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="servicesDropdown">
+                        
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">SPM Machines</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="index.html#vision-inspection">Vision Inspection</a></li>
+                                <li><a class="dropdown-item" href="index.html#assembly-machines">Assembly Machines</a></li>
+                                <li><a class="dropdown-item" href="index.html#pick-place">Pick & Place</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">Electrical Panel</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="index.html#panel-designing">Panel Designing</a></li>
+                                <li><a class="dropdown-item" href="index.html#panel-wiring">Panel Wiring</a></li>
+                                <li><a class="dropdown-item" href="index.html#control-panel">Control Panel</a></li>
+                                <li><a class="dropdown-item" href="index.html#plc-support">PLC Support</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">Data Acquisition System</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="index.html#java-tech">Java Tech</a></li>
+                                <li><a class="dropdown-item" href="index.html#labview-tech">LabVIEW Tech</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="nav-item"><a class="nav-link" href="#contact-footer">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<main class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="fw-bold text-uppercase display-5" style="color:var(--primary);">
+            <i class="bi bi-gear-fill me-2"></i> Toyo Mini Cylinders
+        </h1>
+        <p class="lead" style="color:var(--muted);">
+            Precision Electric Actuators for Micro-positioning and Miniature Applications.
+        </p>
+    </div>
+
+    <ul class="nav nav-tabs justify-content-center" id="miniCylinderTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="csg-tab" data-bs-toggle="tab" data-bs-target="#csg-series" type="button" role="tab" aria-controls="csg-series" aria-selected="true">
+                CSG Series (Mini Cylinder)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="cs-tab" data-bs-toggle="tab" data-bs-target="#cs-series" type="button" role="tab" aria-controls="cs-series" aria-selected="false">
+                CS Series (Miniature Cylinder)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="csgaz-tab" data-bs-toggle="tab" data-bs-target="#csgaz-series" type="button" role="tab" aria-controls="csgaz-series" aria-selected="false">
+                CSGAZ Series (Micro Linear Actuator)
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="miniCylinderTabsContent">
+
+        <div class="tab-pane fade show active" id="csg-series" role="tabpanel" aria-labelledby="csg-tab">
+            
+            <div class="hero hero-csg">
+                <h1 class="text-uppercase">Mini Cylinder - CSG Series</h1>
+                <p class="lead">Actuator with Motor for high rigidity and extremely precise control.</p>
+            </div>
+            
+            <h2 class="section-header"><i class="bi bi-info-circle-fill me-2"></i> Product Overview</h2>
+            <div class="row g-5 align-items-center">
+                <div class="col-md-7">
+                    <p>Toyo’s Actuator with Motor **CSG series** is a high-rigidity mini cylinder designed for applications requiring **extremely precise and accurate control and placement** of large loads. It features a robust and dependable design and a high-quality **servo valve** that enables precise control over the cylinder's movement.</p>
+                    
+                    <p>The utilization of a **ball screw driven mini cylinder** offers precise linear motion in compact spaces, making it a versatile solution across various industries. It is extensively utilized in sectors where accurate and dependable placement is essential, like manufacturing, aerospace, and automotive.</p>
+                </div>
+                
+                <div class="col-md-5 text-center">
+                    <div class="product-image-container">
+                        <img src="https://www.toyorobotics.co/assets/images/project/CSG-series.png" alt="CSG Series Mini Cylinder Schematic" class="img-fluid" onerror="this.onerror=null; this.src='https://placehold.co/400x400/0d1b2a/ffc107?text=CSG+Series+Cylinder+Schematic';">
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="section-header mt-5"><i class="bi bi-list-check me-2"></i> Key Features</h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <ul>
+                        <li><i class="bi bi-check-circle-fill text-warning"></i> **Small Form Factor:** Suitable for applications with **limited space constraints**.</li>
+                        <li><i class="bi bi-check-circle-fill text-warning"></i> **High Accuracy:** Ball screw mechanism ensures **accurate and repeatable linear motion**.</li>
+                        <li><i class="bi bi-check-circle-fill text-warning"></i> **Smooth Movement:** Ball screw design **minimizes friction and backlash**.</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <ul>
+                        <li><i class="bi bi-check-circle-fill text-warning"></i> **High Load Support:** Capable of supporting **significant loads** despite its small size.</li>
+                        <li><i class="bi bi-check-circle-fill text-warning"></i> **High Rigidity:** Robust design for **challenging operating circumstances**.</li>
+                        <li><i class="bi bi-check-circle-fill text-warning"></i> **Precision Control:** Equipped with a high-quality **servo motor/valve**.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h2 class="section-header mt-5"><i class="bi bi-bookmark-star-fill me-2"></i> Applications</h2>
+            <div class="row">
+                <div class="col-md-12">
+                    <ul class="list-unstyled d-flex flex-wrap">
+                        <li class="me-4"><i class="bi bi-check-lg text-warning"></i> Micro-positioning systems</li>
+                        <li class="me-4"><i class="bi bi-check-lg text-warning"></i> Miniature robotics</li>
+                        <li class="me-4"><i class="bi bi-check-lg text-warning"></i> Optical and photonics</li>
+                        <li class="me-4"><i class="bi bi-check-lg text-warning"></i> Medical devices</li>
+                        <li class="me-4"><i class="bi bi-check-lg text-warning"></i> Automated Optical Inspection (AOI) systems</li>
+                        <li class="me-4"><i class="bi bi-check-lg text-warning"></i> Micro-manipulation and Micro-assembly</li>
+                        <li class="me-4"><i class="bi bi-check-lg text-warning"></i> Miniature actuated grippers and End effectors</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="cs-series" role="tabpanel" aria-labelledby="cs-tab">
+            
+            <div class="hero hero-cs">
+                <h1 class="text-uppercase">Miniature Cylinder - CS Series</h1>
+                <p class="lead">Compact, versatile ball screw driven linear actuators with enhanced straightness.</p>
+            </div>
+
+            <h2 class="section-header"><i class="bi bi-info-circle-fill me-2"></i> Product Overview</h2>
+            <div class="row g-5 align-items-center">
+                <div class="col-md-7">
+                    <p>The **CS series miniature electric cylinder** is a compact and versatile linear actuator that provides precise linear motion. As a **ball screw driven** cylinder, it is commonly utilized in applications such as **robotics, automation, 3D printing, and medical devices**.</p>
+                    
+                    <p>A key enhancement is the replacement of the profile linear guide with an **integrated linear bearing** to achieve an overall straightness of **±0.02 mm**. When selecting, factors like stroke length, load capacity, speed, and multiple control options (IO, Pulse, Communication) should be considered.</p>
+                </div>
+                
+                <div class="col-md-5 text-center">
+                    <div class="product-image-container">
+                        <img src="https://www.toyorobotics.co/assets/images/project/CSF2O.png" alt="CS Series Miniature Cylinder Schematic" class="img-fluid" onerror="this.onerror=null; this.src='https://placehold.co/400x400/0d1b2a/ffc107?text=CS+Series+Schematic';">
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="section-header mt-5"><i class="bi bi-list-check me-2"></i> Key Features</h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <ul>
+                        <li><i class="bi bi-check-circle-fill text-warning"></i> **Compact Design:** Features a small size for easy integration.</li>
+                        <li><i class="bi bi-check-circle-fill text-warning"></i> **High Accuracy:** Overall straightness of **±0.02 mm** with integrated linear bearing.</li>
+                        <li><i class="bi bi-check-circle-fill text-warning"></i> **Low Noise:** Lower noise than comparable pneumatic cylinders.</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <ul>
+                        <li><i class="bi bi-check-circle-fill text-warning"></i> **Easy Maintenance:** Designed for straightforward upkeep.</li>
+                        <li><i class="bi bi-check-circle-fill text-warning"></i> **Improved Strength:** Enhanced housing strength and smoothness.</li>
+                        <li><i class="bi bi-check-circle-fill text-warning"></i> **Multiple Control Options:** Supports **IO, Pulse, and Communication** methods.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h2 class="section-header mt-5"><i class="bi bi-bookmark-star-fill me-2"></i> Applications</h2>
+            <div class="row">
+                <div class="col-md-12">
+                    <ul class="list-unstyled d-flex flex-wrap">
+                        <li class="me-4"><i class="bi bi-check-lg text-warning"></i> Micro-positioning systems</li>
+                        <li class="me-4"><i class="bi bi-check-lg text-warning"></i> Miniature robotics</li>
+                        <li class="me-4"><i class="bi bi-check-lg text-warning"></i> Optical and photonics</li>
+                        <li class="me-4"><i class="bi bi-check-lg text-warning"></i> Medical devices</li>
+                        <li class="me-4"><i class="bi bi-check-lg text-warning"></i> Automated Optical Inspection (AOI) systems</li>
+                        <li class="me-4"><i class="bi bi-check-lg text-warning"></i> Micro-manipulation and Micro-assembly</li>
+                        <li class="me-4"><i class="bi bi-check-lg text-warning"></i> Miniature actuated grippers and End effectors</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="csgaz-series" role="tabpanel" aria-labelledby="csgaz-tab">
+            
+            <div class="hero hero-csgaz">
+                <h1 class="text-uppercase">Micro Linear Actuator - CSGAZ Series</h1>
+                <p class="lead">A combined solution of the CSG mini actuator with the Oriental Stepper Motor AZ series.</p>
+            </div>
+
+            <h2 class="section-header"><i class="bi bi-info-circle-fill me-2"></i> Product Overview</h2>
+            <div class="row g-5 align-items-center">
+                <div class="col-md-7">
+                    <p>The **CSGAZ series** is an integrated solution combining the **TOYO CSG series mini actuator** with the **Oriental step motor AZ series**. The AZ motor offers compact size and high torque, and when mounted inline, it helps **reduce the overall application length**.</p>
+                    
+                    <p>This solution is ideal for applications with **space constraints** and where only less force is required for pushing or pulling. Leveraging the **low-speed, high-torque characteristics** of the AZ motor, the micro electric cylinder achieves a maximum thrust of **460N** and a maximum stroke of **125mm**. Crucially, the need for a **gearbox is eliminated**.</p>
+                </div>
+                
+                <div class="col-md-5 text-center">
+                    <div class="product-image-container">
+                        <img src="https://www.toyorobotics.co/assets/images/project/CSG35AZ.png" alt="CSGAZ Series Micro Linear Actuator Schematic" class="img-fluid" onerror="this.onerror=null; this.src='https://placehold.co/400x400/0d1b2a/ffc107?text=CSGAZ+Series+Schematic';">
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="section-header mt-5"><i class="bi bi-list-check me-2"></i> Key Features</h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <ul>
+                        <li><i class="bi bi-check-circle-fill text-warning"></i> **High Thrust & Stroke:** Max thrust **460N**, Max stroke **125mm**.</li>
+                        <li><i class="bi bi-check-circle-fill text-warning"></i> **No Gearbox Needed:** Achieves performance without a gearbox.</li>
+                        <li><i class="bi bi-check-circle-fill text-warning"></i> **Compact Design:** Multiple motor lead directions and compact motor size.</li>
+                        
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <ul>
+                        <li><i class="bi bi-check-circle-fill text-warning"></i> **Easy Maintenance:** Can be maintained without opening the cover (easier greasing).</li>
+                        <li><i class="bi bi-check-circle-fill text-warning"></i> **Network Support:** Wide range of protocol support (**EtherNet/IP, EtherCAT, Modbus, CC-Link**, etc.).</li>
+                        <li><i class="bi bi-check-circle-fill text-warning"></i> **Absolute Encoder:** No batteries needed for the motor's Multi Loop Absolute Encoder.</li>
+                        
+                    </ul>
+                </div>
+            </div>
+
+            <h2 class="section-header mt-5"><i class="bi bi-bookmark-star-fill me-2"></i> Applications</h2>
+            <div class="row">
+                <div class="col-md-12">
+                    <ul class="list-unstyled d-flex flex-wrap">
+                        <li class="me-4"><i class="bi bi-check-lg text-warning"></i> Micro-positioning systems</li>
+                        <li class="me-4"><i class="bi bi-check-lg text-warning"></i> Miniature robotics</li>
+                        <li class="me-4"><i class="bi bi-check-lg text-warning"></i> Optical and photonics</li>
+                        <li class="me-4"><i class="bi bi-check-lg text-warning"></i> Medical devices</li>
+                        <li class="me-4"><i class="bi bi-check-lg text-warning"></i> Automated Optical Inspection (AOI) systems</li>
+                        <li class="me-4"><i class="bi bi-check-lg text-warning"></i> Micro-manipulation and Micro-assembly</li>
+                        <li class="me-4"><i class="bi bi-check-lg text-warning"></i> Miniature actuated grippers and End effectors</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    
+    <div class="text-center mt-6 py-5 border-top border-bottom">
+        <h3 class="fw-bold" style="color:var(--primary);">Need a Customized Automation Solution?</h3>
+        <p class="lead mb-4" style="color:var(--muted);">
+            Our engineers are ready to help you select the ideal Toyo Actuator and integrate it seamlessly into your process.
+        </p>
+        <a href="#contact-footer" class="btn btn-lg fw-bold" style="background:var(--accent); color:var(--primary);">
+            <i class="bi bi-envelope-fill me-2"></i> Request a Quote
+        </a>
+    </div>
+</main>
+<footer id="contact-footer">
+    <div class="container text-center">
+        <h4 class="fw-bold mb-4 text-uppercase" style="color:var(--accent);">
+            <i class="bi bi-headset me-2"></i> Contact Robo Draft Automation
+        </h4>
+        <p class="mb-2">24, Vijaya Nagar, Mel Ayanambakkam,<br>Opp to Royal Club, Chennai - 600098.</p>
+        <p class="mb-4 lead">
+            <i class="bi bi-envelope-fill me-2"></i> Email: <a href="mailto:robodraftautomation@gmail.com">robodraftautomation@gmail.com</a>
+            &nbsp;|&nbsp;
+            <i class="bi bi-phone-fill me-2"></i> Phone: <a href="tel:+919999999999">+91 99999 99999</a>
+        </p>
+        <p class="text-white-50 small">&copy; <span id="current-year"></span> Robo Draft Automation. All rights reserved.</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // JavaScript to handle the nested dropdown functionality, especially on mobile
+    document.addEventListener("DOMContentLoaded", function(){
+        // Set current year in the footer
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // Handle nested dropdowns (dropdown-submenu)
+        document.querySelectorAll('.dropdown-submenu > a').forEach(function(element){
+            element.addEventListener('click', function(e){
+                e.preventDefault();
+                e.stopPropagation(); // Stop event from closing the main dropdown
+
+                let nextSibling = element.nextElementSibling;
+                
+                // Close all other open submenus at the same level
+                element.closest('.dropdown-menu').querySelectorAll('.dropdown-menu').forEach(function(menu){
+                    if(menu !== nextSibling){
+                        menu.classList.remove('show');
+                    }
+                });
+
+                // Toggle the current submenu
+                if (nextSibling && nextSibling.classList.contains('dropdown-menu')) {
+                    nextSibling.classList.toggle('show');
+                }
+            });
+        });
+
+        // Close submenus when clicking outside (mobile fix)
+        document.querySelectorAll('.dropdown-toggle').forEach(function(toggle){
+            toggle.addEventListener('hidden.bs.dropdown', function () {
+                this.closest('.dropdown').querySelectorAll('.dropdown-submenu > .dropdown-menu').forEach(function(menu){
+                    menu.classList.remove('show');
+                });
+            })
+        });
+    });
+</script>
+</body>
+</html>

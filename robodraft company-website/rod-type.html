@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Robo Draft Automation | Rod Type Actuators</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/jpeg" href="rda.jpg" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        /* Professional Color Palette & Typography */
+        :root {
+            --primary: #0d1b2a; /* Dark Navy for main elements */
+            --accent: #ffc107;  /* Yellow/Gold for highlights */
+            --muted: #555;      /* Darker grey for body text */
+            --light-bg: #f5f6f7; /* Very light grey background */
+            --white: #fff;
+        }
+        body { 
+            font-family: 'Poppins', 'Segoe UI', sans-serif; /* Slightly more modern font stack */
+            background: var(--light-bg); 
+            color: #222; 
+        }
+
+        /* --- Navbar Styles --- */
+        .navbar { 
+            background: var(--primary); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+        }
+        .navbar-brand img { 
+            height:56px; 
+            border-radius:6px; 
+            border:1px solid var(--accent); /* Logo highlight */
+            padding:2px; 
+        }
+        .navbar-nav .nav-link {
+            color: var(--white) !important; 
+            font-weight: 500; /* Adjusted for better readability */
+            margin: 0 8px; 
+            transition: color .3s ease-in-out;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .navbar-nav .nav-link:hover {
+            color: var(--accent) !important; 
+            text-shadow: 0 0 10px rgba(255,193,7,0.6);
+        }
+        /* Active link style inside the dropdown */
+        .dropdown-item.active {
+            background: var(--accent) !important; 
+            color: var(--primary) !important; 
+            font-weight: 600 !important;
+        }
+        
+        /* === Dropdown Submenu Fixes (LEFT side opening and stylish pop-out) === */
+        .dropdown-submenu { position:relative; }
+        .dropdown-submenu > .dropdown-menu {
+            top: 0; 
+            left: auto; 
+            right: 100%; 
+            margin-right: -1px; 
+            
+            display:none; 
+            opacity:0; 
+            transform: translateX(-10px); /* Slightly increased initial shift */
+            transition: all .3s cubic-bezier(0.165, 0.84, 0.44, 1); /* Smoother animation curve */
+
+            border:none; border-radius:10px; box-shadow:0 8px 20px rgba(0,0,0,0.2); /* Deeper shadow */
+        }
+        .dropdown-menu {
+            border:none; border-radius:10px; box-shadow:0 8px 20px rgba(0,0,0,0.2);
+            padding: 10px 0; /* Add padding inside dropdown */
+        }
+
+        @media (min-width: 992px){
+            .dropdown:hover > .dropdown-menu,
+            .dropdown-submenu:hover > .dropdown-menu { 
+                display:block; 
+                opacity:1; 
+                transform: translateX(0); 
+            }
+        }
+        .dropdown-item {
+            padding: 8px 20px;
+            font-size: 0.95rem;
+            color: #333;
+        }
+        .dropdown-item:hover { 
+            background: var(--accent); 
+            color: var(--primary); 
+            font-weight: 600; 
+        }
+        /* Mobile Fix - Cleaned up and consolidated */
+        @media (max-width: 991px){
+            .dropdown-menu { 
+                position:static !important; 
+                transform:none !important; 
+                opacity:1 !important; 
+                display:none; 
+                right: auto !important; 
+                margin-right: 0 !important;
+                border-left: 2px solid var(--accent); /* Mobile visual hierarchy */
+            }
+            .dropdown-menu.show { display:block !important; }
+            .dropdown-submenu > .dropdown-menu { 
+                margin-left: 1.5rem !important; /* Increased indent */
+                padding: 5px 0;
+            }
+        }
+        /* ================================================= */
+
+
+        /* --- Hero Section (The Top Image Area inside the tab) --- */
+        .hero {
+            background-size: cover !important;
+            background-position: center !important;
+            padding: 80px 20px; /* Reduced padding slightly */
+            text-align: center;
+            border-radius: 12px;
+            margin-top: 30px;
+            margin-bottom: 30px; /* Added bottom margin */
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15); /* Slightly stronger shadow */
+            min-height: 300px; /* Adjusted min-height */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(13, 27, 42, 0.65); /* Darker overlay for text contrast */
+            z-index: 1;
+        }
+        .hero h1, .hero p {
+            position: relative;
+            z-index: 2;
+            color: var(--accent);
+            text-shadow: 0 3px 12px rgba(0,0,0,0.95); /* Sharper text shadow */
+        }
+        .hero h1 { 
+            font-weight: 900; 
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+        .hero p.lead {
+             font-size: 1.25rem;
+             color: #ffda85; /* Lighter accent shade for lead text */
+        }
+        
+        /* --- Tabs --- */
+        .nav-tabs { 
+            border-bottom: 3px solid var(--primary); 
+            margin-bottom: 40px; /* Increased bottom margin */
+        }
+        .nav-tabs .nav-link {
+            border: 1px solid #ddd;
+            border-bottom-color: transparent;
+            margin-right: 5px;
+            background-color: #eee;
+            color: var(--primary);
+            font-weight: 700;
+            padding: 10px 20px;
+            transition: all 0.3s;
+            border-radius: 8px 8px 0 0;
+        }
+        .nav-tabs .nav-link.active {
+            color: var(--white); 
+            background-color: var(--primary); 
+            border-color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        .nav-tabs .nav-link:hover:not(.active) { background-color: #d8d8d8; }
+
+        /* --- Content Area --- */
+        .tab-pane {
+            background: var(--white);
+            padding: 40px; /* Increased padding */
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); /* Smoother shadow */
+        }
+        .section-header {
+            color: var(--primary);
+            font-weight: 800;
+            font-size: 1.8rem;
+            border-bottom: 3px solid var(--accent); /* Thicker accent line */
+            padding-bottom: 10px;
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+        ul { list-style: disc; padding-left: 25px; }
+        ul li { margin-bottom: 10px; line-height: 1.6; } /* Better line spacing */
+        p { line-height: 1.6; }
+
+        /* Image styling */
+        .content-img {
+            max-height: 380px; /* Slightly increased max-height */
+            width: auto;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        /* Call to Action Button */
+        .btn-lg {
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            transition: background 0.3s, transform 0.2s;
+        }
+        .btn-lg:hover {
+            background: #ffdb7d !important;
+            transform: translateY(-2px);
+        }
+
+        /* --- Footer --- */
+        footer {
+            background: var(--primary);
+            color: #ddd; /* Lighter text color */
+            text-align: center;
+            padding: 50px 0; /* Increased padding */
+            margin-top: 80px;
+        }
+        footer a { color: var(--accent); text-decoration: none; transition: color 0.3s; }
+        footer a:hover { color: var(--white); text-decoration: underline; }
+
+        /* Additional styles for Actuator content */
+        .specs-table th { background:var(--accent); color:#000; font-weight:700; }
+        .specs-table td, .specs-table th { vertical-align: middle; padding: 12px; }
+        .text-nowrap { white-space: nowrap; } /* To keep math notations on a single line */
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="index.html">
+            <img src="rda.jpg" onerror="this.onerror=null; this.src='https://placehold.co/56x56/0d1b2a/ffc107?text=RDA';" alt="ROBO DRAFT logo" class="me-3">
+            <div>
+                <div style="color:var(--white); font-weight:800; font-size:1.25rem;">ROBO DRAFT AUTOMATION</div>
+                <div style="color:var(--accent); font-weight:600; font-size:.85rem; letter-spacing: 1px;">ROBUST FUTURE</div>
+            </div>
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navMenu">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="index.html#about">About</a></li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" id="productsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: var(--accent) !important;">
+                        Products
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="productsDropdown">
+
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">Toyo Actuators</a>
+                            <ul class="dropdown-menu">
+
+                                <li class="dropdown-submenu">
+                                    <a class="dropdown-item dropdown-toggle" href="#">Motorless Actuators</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="ball-screw.html">Ball Screw Type</a></li>
+                                        <li><a class="dropdown-item" href="belt-actuators.html">Belt Type</a></li>
+                                        <li><a class="dropdown-item active" href="rod-type.html">Rod Type</a></li>
+                                        <li><a class="dropdown-item" href="clean-room.html">Clean Room</a></li>
+                                        <li><a class="dropdown-item" href="index.html#rack&pinion">Rack & Pinion</a></li>
+                                        <li><a class="dropdown-item" href="index.html#multi-axis">Multi Axis Actuator</a></li>
+                                    </ul>
+                                </li>
+
+                                <li class="dropdown-submenu">
+                                    <a class="dropdown-item dropdown-toggle" href="#">Actuator with Motor</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="index.html#stepper-motor">Stepper Motor Actuator</a></li>
+                                        <li><a class="dropdown-item" href="index.html#servo-motor">Servo Motor Actuator</a></li>
+                                        <li><a class="dropdown-item" href="index.html#mini-cylinder">Mini Cylinder</a></li>
+                                        <li><a class="dropdown-item" href="index.html#gripper">Gripper</a></li>
+                                    </ul>
+                                </li>
+
+                                <li class="dropdown-submenu">
+                                    <a class="dropdown-item dropdown-toggle" href="#">Robot</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="index.html#desktop-robot">Desktop Robot</a></li>
+                                        <li><a class="dropdown-item" href="index.html#cartesian-robot">Cartesian Robot</a></li>
+                                        <li><a class="dropdown-item" href="index.html#linear-motor-actuator">Linear Motor Actuator</a></li>
+                                        <li><a class="dropdown-item" href="index.html#air-bearing">Air Bearing Linear Stage</a></li>
+                                        <li><a class="dropdown-item" href="index.html#cast-iron">Cast Iron Axis Stage</a></li>
+                                        <li><a class="dropdown-item" href="index.html#horizontal-z">Horizontal Z Axis Stage</a></li>
+                                        <li><a class="dropdown-item" href="index.html#alignment-stage">Alignment Stage</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">Pneumatics</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="index.html#iso-cylinder">ISO Cylinder</a></li>
+                                <li><a class="dropdown-item" href="index.html#compact-cylinder">Compact Cylinder</a></li>
+                                <li><a class="dropdown-item" href="index.html#solenoid-cylinder">Solenoid Valves</a></li>
+                                <li><a class="dropdown-item" href="index.html#pneumatic-accessories">Pneumatic Accessories</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Services
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="servicesDropdown">
+                        
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">SPM Machines</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="index.html#vision-inspection">Vision Inspection</a></li>
+                                <li><a class="dropdown-item" href="index.html#assembly-machines">Assembly Machines</a></li>
+                                <li><a class="dropdown-item" href="index.html#pick-place">Pick & Place</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">Electrical Panel</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="index.html#panel-designing">Panel Designing</a></li>
+                                <li><a class="dropdown-item" href="index.html#panel-wiring">Panel Wiring</a></li>
+                                <li><a class="dropdown-item" href="index.html#control-panel">Control Panel</a></li>
+                                <li><a class="dropdown-item" href="index.html#plc-support">PLC Support</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">Data Acquisition System</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="index.html#java-tech">Java Tech</a></li>
+                                <li><a class="dropdown-item" href="index.html#labview-tech">LabVIEW Tech</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="nav-item"><a class="nav-link" href="#contact-footer">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<main class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="fw-bold text-uppercase display-5" style="color:var(--primary);">
+            <i class="bi bi-gear-fill me-2"></i> Toyo Motorless Rod Type Actuators
+        </h1>
+        <p class="lead" style="color:var(--muted);">
+            Precision Pushing, Pulling, and Vertical Positioning Solutions.
+        </p>
+    </div>
+
+    <ul class="nav nav-tabs justify-content-center" id="actuatorTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="gty-tab" data-bs-toggle="tab" data-bs-target="#gty" type="button" role="tab" aria-controls="gty" aria-selected="true">
+                <i class="bi bi-rocket-takeoff me-1"></i> GTY Series (High Thrust)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="gtb-tab" data-bs-toggle="tab" data-bs-target="#gtb" type="button" role="tab" aria-controls="gtb" aria-selected="false">
+                <i class="bi bi-box-seam me-1"></i> GTB Series (Compact Guided)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="y-tab" data-bs-toggle="tab" data-bs-target="#y" type="button" role="tab" aria-controls="y" aria-selected="false">
+                <i class="bi bi-battery-half me-1"></i> Y-Series (Slim & Light)
+            </button>
+        </li>
+    </ul>
+    <div class="tab-content" id="actuatorTabsContent">
+
+        <!-- GTY Series Tab Content (High Thrust, Guided Rod) -->
+        <div class="tab-pane fade show active" id="gty" role="tabpanel" aria-labelledby="gty-tab">
+            
+            <div class="hero" style="background-image:url('https://www.toyorobotics.co/assets/images/GTY.png');">
+                <h1 class="text-uppercase">GTY Series – High Thrust Guided Rod Actuator</h1>
+                <p class="lead">Robust solution for heavy loads, high thrust, and anti-rotation requirements.</p>
+            </div>
+
+            <h3 class="section-header"><i class="bi bi-info-circle-fill me-2"></i> GTY Series Overview</h3>
+            <div class="row g-5 align-items-center">
+                <div class="col-md-5 text-center">
+                    <!-- Using one of the provided GTY images -->
+                    <img src="https://www.toyorobotics.co/assets/images/project/GTY.png" alt="GTY Series Rod Actuator Diagram" class="img-fluid rounded shadow content-img" onerror="this.onerror=null; this.src='https://placehold.co/380x380/0d1b2a/ffc107?text=GTY+Series+Diagram';">
+                </div>
+                <div class="col-md-7">
+                    <p>The <strong>GTY Series</strong> is Toyo’s heavy-duty rod type actuator, featuring a robust internal linear guide structure to handle significant pushing, pulling, and moment loads. It is specifically designed for applications requiring high thrust forces and precise, anti-rotation positioning. The built-in guide rods ensure stability and accuracy throughout the stroke, making it a reliable replacement for traditional pneumatic cylinders in challenging environments.</p>
+                    <h5 class="fw-semibold mt-4" style="color:var(--primary);"><i class="bi bi-check-circle-fill me-2" style="color:var(--accent);"></i> Key Features:</h5>
+                    <ul>
+                        <li>High thrust capability, up to <span class="text-nowrap">$450\text{ N}$</span>, for heavy-duty work.</li>
+                        <li>Built-in linear guide rods provide excellent anti-rotation and high load moment capacity.</li>
+                        <li>High repeatability of <span class="text-nowrap">$\pm 0.02\text{ mm}$</span> for precise stops.</li>
+                        <li>Max speed up to <span class="text-nowrap">$1000\text{ mm/s}$</span>, balancing speed and load.</li>
+                        <li>Suitable for vertical applications requiring precise lifts and plunges.</li>
+                    </ul>
+                    <h5 class="fw-semibold mt-4" style="color:var(--primary);"><i class="bi bi-box-seam-fill me-2" style="color:var(--accent);"></i> Typical Applications:</h5>
+                    <ul>
+                        <li>Gate valve control and fluidic applications</li>
+                        <li>Heavy material sorting and diverting in conveyor lines</li>
+                        <li>Press-fitting and clamping operations</li>
+                        <li>High-force inspection and probing systems</li>
+                        <li>Vertical lifting mechanisms for heavy components</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- GTB Series Tab Content (Compact, Guided Rod) -->
+        <div class="tab-pane fade" id="gtb" role="tabpanel" aria-labelledby="gtb-tab">
+            <div class="hero" style="background-image:url('https://www.toyorobotics.co/assets/images/rodtype.png');">
+                <h1 class="text-uppercase">GTB Series – Compact Guided Rod Actuator</h1>
+                <p class="lead">A space-saving solution with internal guides for stable push/pull motion.</p>
+            </div>
+
+            <h3 class="section-header"><i class="bi bi-info-circle-fill me-2"></i> GTB Series Overview</h3>
+            <div class="row g-5 align-items-center">
+                <div class="col-md-5 text-center order-md-2">
+                    <!-- Using the generic rod type image for GTB -->
+                    <img src="https://www.toyorobotics.co/assets/images/rodtype.png" alt="GTB Series Compact Rod Actuator" class="img-fluid rounded shadow content-img" onerror="this.onerror=null; this.src='https://placehold.co/380x380/0d1b2a/ffc107?text=GTB+Internal+Structure';">
+                </div>
+                <div class="col-md-7 order-md-1">
+                    <p>The <strong>GTB Series</strong> provides an excellent balance of load capacity and compact size. Designed with internal guides, it ensures smooth and stable linear movement, minimizing rod deflection under load. This series is often used in automation setups where space is constrained but reliable, repeatable motion is essential. It serves as an optimal electric alternative to pneumatic cylinders, offering full control over position, speed, and force.</p>
+                    <h5 class="fw-semibold mt-4" style="color:var(--primary);"><i class="bi bi-check-circle-fill me-2" style="color:var(--accent);"></i> Key Features:</h5>
+                    <ul>
+                        <li>Compact footprint with reliable built-in guidance for stability.</li>
+                        <li>Handles static loads up to <span class="text-nowrap">$50\text{ kg}$</span> depending on model size.</li>
+                        <li>Max stroke capacity up to <span class="text-nowrap">$1000\text{ mm}$</span>.</li>
+                        <li>High rigidity suitable for high duty cycle push-and-hold applications.</li>
+                        <li>Provides consistent repeatability of <span class="text-nowrap">$\pm 0.02\text{ mm}$</span>.</li>
+                    </ul>
+                    <h5 class="fw-semibold mt-4" style="color:var(--primary);"><i class="bi bi-box-seam-fill me-2" style="color:var(--accent);"></i> Typical Applications:</h5>
+                    <ul>
+                        <li>Parts feeding and separation devices</li>
+                        <li>Precision dispensing and gluing systems</li>
+                        <li>Small-scale press-fitting and insertion tasks</li>
+                        <li>Packaging machine pushers and ejectors</li>
+                        <li>General purpose vertical lift and transfer units</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Y-Series Tab Content (Slim, Light Load Rod) -->
+        <div class="tab-pane fade" id="y" role="tabpanel" aria-labelledby="y-tab">
+            <div class="hero" style="background-image:url('https://www.toyorobotics.co/assets/images/project/Y43.png');">
+                <h1 class="text-uppercase">Y-Series – Slim & Short Stroke Rod Actuator</h1>
+                <p class="lead">Ultra-compact, non-guided rod type for light assembly and minute positioning.</p>
+            </div>
+
+            <h3 class="section-header"><i class="bi bi-info-circle-fill me-2"></i> Y-Series Overview</h3>
+            <div class="row g-5 align-items-center">
+                <div class="col-md-5 text-center">
+                    <!-- Using the provided Y-Series image -->
+                    <img src="https://www.toyorobotics.co/assets/images/project/Y-SERIES.png" alt="Y-Series Slim Rod Actuator Diagram" class="img-fluid rounded shadow content-img" onerror="this.onerror=null; this.src='https://placehold.co/380x380/0d1b2a/ffc107?text=Y-Series+Diagram';">
+                </div>
+                <div class="col-md-7">
+                    <p>The <strong>Y-Series</strong> is designed for the most demanding space requirements. This series is extremely slim, lightweight, and engineered for short, precise movements involving light loads. It's the ideal choice for small electronic assembly, optical positioning, and light-duty material handling where a minimal footprint is critical. While it is non-guided, its precision mechanics ensure excellent repeatability and accuracy for its size class.</p>
+                    <h5 class="fw-semibold mt-4" style="color:var(--primary);"><i class="bi bi-check-circle-fill me-2" style="color:var(--accent);"></i> Key Features:</h5>
+                    <ul>
+                        <li>Minimal width and height, occupying very little machine space.</li>
+                        <li>Ideal for light loads and high-precision short stroke applications.</li>
+                        <li>Stroke range typically from <span class="text-nowrap">$10\text{ mm}$</span> to <span class="text-nowrap">$200\text{ mm}$</span>.</li>
+                        <li>Maximum thrust around <span class="text-nowrap">$100\text{ N}$</span> for small component handling.</li>
+                        <li>Exceptional repeatability of <span class="text-nowrap">$\pm 0.01\text{ mm}$</span>.</li>
+                    </ul>
+                    <h5 class="fw-semibold mt-4" style="color:var(--primary);"><i class="bi bi-box-seam-fill me-2" style="color:var(--accent);"></i> Typical Applications:</h5>
+                    <ul>
+                        <li>Component positioning in electronic assembly</li>
+                        <li>Lens/sensor focusing and minute adjustment</li>
+                        <li>Testing and measurement jigs</li>
+                        <li>Actuators for small tooling and fixtures</li>
+                        <li>Light-duty pick-and-place operation</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div> 
+    <div class="text-center mt-6 py-5 border-top border-bottom">
+        <h3 class="fw-bold" style="color:var(--primary);">Need a Customized Automation Solution?</h3>
+        <p class="lead mb-4" style="color:var(--muted);">
+            Our engineers are ready to help you select the ideal Toyo Rod Type Actuator and integrate it seamlessly into your process.
+        </p>
+        <a href="#contact-footer" class="btn btn-lg fw-bold" style="background:var(--accent); color:var(--primary);">
+            <i class="bi bi-envelope-fill me-2"></i> Request a Quote
+        </a>
+    </div>
+    </main> 
+
+<footer id="contact-footer">
+    <div class="container text-center">
+        <h4 class="fw-bold mb-4 text-uppercase" style="color:var(--accent);">
+            <i class="bi bi-headset me-2"></i> Contact Robo Draft Automation
+        </h4>
+        <p class="mb-2">24, Vijaya Nagar, Mel Ayanambakkam,<br>Opp to Royal Club, Chennai - 600098.</p>
+        <p class="mb-4 lead">
+            <i class="bi bi-envelope-fill me-2"></i> Email: <a href="mailto:robodraftautomation@gmail.com">robodraftautomation@gmail.com</a>
+            &nbsp;|&nbsp;
+            <i class="bi bi-phone-fill me-2"></i> Phone: 
+            <a href="tel:9944533640" class="text-nowrap">99445 33640</a>, 
+            <a href="tel:9840435640" class="text-nowrap">98404 35640</a>
+        </p>
+        <hr style="border-color: #333; width: 50%; margin: 0 auto 20px;">
+        <p style="font-size:0.85rem; color:#aaa;">&copy; 2025 <strong>ROBO DRAFT AUTOMATION</strong>. All Rights Reserved. | <a href="index.html">Home</a></p>
+    </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.querySelectorAll('.dropdown-submenu > a').forEach(function(element){
+        element.addEventListener('click', function(e){
+            // Only apply custom logic for screens smaller than the 'lg' breakpoint (992px)
+            if(window.innerWidth < 992){
+                e.preventDefault();
+                e.stopPropagation();
+                const sub = this.nextElementSibling;
+                
+                // Toggle visibility of the submenu
+                if (sub && sub.classList.contains('dropdown-menu')) {
+                    if (sub.style.display === 'block') {
+                        sub.style.display = 'none';
+                    } else {
+                        // Close all sibling submenus first
+                        this.closest('.dropdown-submenu').querySelectorAll('.dropdown-menu').forEach(menu => {
+                            if (menu !== sub) menu.style.display = 'none';
+                        });
+                        sub.style.display = 'block';
+                    }
+                }
+            }
+        });
+    });
+
+    // Ensure initial image loading is handled for placeholder images if URLs fail
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('img[onerror]').forEach(img => {
+            img.addEventListener('error', function() {
+                // The onerror attribute is already set in the HTML for placeholders
+            });
+        });
+    });
+</script>

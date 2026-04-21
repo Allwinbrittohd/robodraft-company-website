@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Robo Draft Automation | Stepper Motor Actuators</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/jpeg" href="rda.jpg" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        /* Professional Color Palette & Typography */
+        :root {
+            --primary: #0d1b2a; /* Dark Navy for main elements */
+            --accent: #ffc107;  /* Yellow/Gold for highlights */
+            --muted: #555;      /* Darker grey for body text */
+            --light-bg: #f5f6f7; /* Very light grey background */
+            --white: #fff;
+        }
+        body { 
+            font-family: 'Poppins', 'Segoe UI', sans-serif; /* Slightly more modern font stack */
+            background: var(--light-bg); 
+            color: #222; 
+        }
+
+        /* --- Navbar Styles --- */
+        .navbar { 
+            background: var(--primary); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+        }
+        .navbar-brand img { 
+            height:56px; 
+            border-radius:6px; 
+            border:1px solid var(--accent); /* Logo highlight */
+            padding:2px; 
+        }
+        .navbar-nav .nav-link {
+            color: var(--white) !important; 
+            font-weight: 500; /* Adjusted for better readability */
+            margin: 0 8px; 
+            transition: color .3s ease-in-out;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .navbar-nav .nav-link:hover {
+            color: var(--accent) !important; 
+            text-shadow: 0 0 10px rgba(255,193,7,0.6);
+        }
+        /* Active link style inside the dropdown */
+        .dropdown-item.active {
+            background: var(--accent) !important; 
+            color: var(--primary) !important; 
+            font-weight: 600 !important;
+        }
+        
+        /* === Dropdown Submenu Fixes (LEFT side opening and stylish pop-out) === */
+        .dropdown-submenu { position:relative; }
+        .dropdown-submenu > .dropdown-menu {
+            top: 0; 
+            left: auto; 
+            right: 100%; 
+            margin-right: -1px; 
+            
+            display:none; 
+            opacity:0; 
+            transform: translateX(-10px); /* Slightly increased initial shift */
+            transition: all .3s cubic-bezier(0.165, 0.84, 0.44, 1); /* Smoother animation curve */
+
+            border:none; border-radius:10px; box-shadow:0 8px 20px rgba(0,0,0,0.2); /* Deeper shadow */
+        }
+        .dropdown-menu {
+            border:none; border-radius:10px; box-shadow:0 8px 20px rgba(0,0,0,0.2);
+            padding: 10px 0; /* Add padding inside dropdown */
+        }
+
+        @media (min-width: 992px){
+            .dropdown:hover > .dropdown-menu,
+            .dropdown-submenu:hover > .dropdown-menu { 
+                display:block; 
+                opacity:1; 
+                transform: translateX(0); 
+            }
+        }
+        .dropdown-item {
+            padding: 8px 20px;
+            font-size: 0.95rem;
+            color: #333;
+        }
+        .dropdown-item:hover { 
+            background: var(--accent); 
+            color: var(--primary); 
+            font-weight: 600; 
+        }
+        /* Mobile Fix - Cleaned up and consolidated */
+        @media (max-width: 991px){
+            .dropdown-menu { 
+                position:static !important; 
+                transform:none !important; 
+                opacity:1 !important; 
+                display:none; 
+                right: auto !important; 
+                margin-right: 0 !important;
+                border-left: 2px solid var(--accent); /* Mobile visual hierarchy */
+            }
+            .dropdown-menu.show { display:block !important; }
+            .dropdown-submenu > .dropdown-menu { 
+                margin-left: 1.5rem !important; /* Increased indent */
+                padding: 5px 0;
+            }
+        }
+        /* ================================================= */
+
+
+        /* --- Hero Section (The Top Image Area inside the tab) --- */
+        .hero {
+            background-size: cover !important;
+            background-position: center !important;
+            padding: 80px 20px; 
+            text-align: center;
+            border-radius: 12px;
+            margin-top: 30px;
+            margin-bottom: 30px; 
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
+            min-height: 300px; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(13, 27, 42, 0.65); /* Darker overlay for text contrast */
+            z-index: 1;
+        }
+        .hero h1, .hero p {
+            position: relative;
+            z-index: 2;
+            color: var(--accent);
+            text-shadow: 0 3px 12px rgba(0,0,0,0.95); /* Sharper text shadow */
+        }
+        .hero h1 { 
+            font-weight: 900; 
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+        .hero p.lead {
+             font-size: 1.25rem;
+             color: #ffda85; /* Lighter accent shade for lead text */
+        }
+        
+        /* --- Tabs --- */
+        .nav-tabs { 
+            border-bottom: 3px solid var(--primary); 
+            margin-bottom: 40px; 
+        }
+        .nav-tabs .nav-link {
+            border: 1px solid #ddd;
+            border-bottom-color: transparent;
+            margin-right: 5px;
+            background-color: #eee;
+            color: var(--primary);
+            font-weight: 700;
+            padding: 10px 15px; /* Slightly adjusted padding for more tabs */
+            transition: all 0.3s;
+            border-radius: 8px 8px 0 0;
+            font-size: 0.9rem;
+        }
+        .nav-tabs .nav-link.active {
+            color: var(--white); 
+            background-color: var(--primary); 
+            border-color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        .nav-tabs .nav-link:hover:not(.active) { background-color: #d8d8d8; }
+
+        /* --- Content Area --- */
+        .tab-content {
+            background: var(--white);
+            padding: 40px; 
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
+        }
+        .section-header {
+            color: var(--primary);
+            font-weight: 800;
+            font-size: 1.8rem;
+            border-bottom: 3px solid var(--accent); 
+            padding-bottom: 10px;
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+        ul { list-style: disc; padding-left: 25px; }
+        ul li { margin-bottom: 10px; line-height: 1.6; } 
+        p { line-height: 1.6; }
+
+        /* Image styling */
+        .content-img {
+            max-height: 380px; 
+            width: auto;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        
+        /* Call to Action Button */
+        .btn-lg {
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            transition: background 0.3s, transform 0.2s;
+        }
+        .btn-lg:hover {
+            background: #ffdb7d !important;
+            transform: translateY(-2px);
+        }
+
+        /* --- Footer --- */
+        footer {
+            background: var(--primary);
+            color: #ddd; 
+            text-align: center;
+            padding: 50px 0; 
+            margin-top: 80px;
+        }
+        footer a { color: var(--accent); text-decoration: none; transition: color 0.3s; }
+        footer a:hover { color: var(--white); text-decoration: underline; }
+
+        /* Mobile Adjustments for Tabs */
+        @media (max-width: 767px) {
+            .nav-tabs .nav-link {
+                padding: 8px 10px;
+                font-size: 0.75rem;
+                display: block;
+                text-align: center;
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="index.html">
+            <img src="rda.jpg" onerror="this.onerror=null; this.src='https://placehold.co/56x56/0d1b2a/ffc107?text=RDA';" alt="ROBO DRAFT logo" class="me-3">
+            <div>
+                <div style="color:var(--white); font-weight:800; font-size:1.25rem;">ROBO DRAFT AUTOMATION</div>
+                <div style="color:var(--accent); font-weight:600; font-size:.85rem; letter-spacing: 1px;">ROBUST FUTURE</div>
+            </div>
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navMenu">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="index.html#about">About</a></li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" id="productsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: var(--accent) !important;">
+                        Products
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="productsDropdown">
+
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">Toyo Actuators</a>
+                            <ul class="dropdown-menu">
+
+                                <li class="dropdown-submenu">
+                                    <a class="dropdown-item dropdown-toggle" href="#">Motorless Actuators</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="ball-screw.html">Ball Screw Type</a></li>
+                                        <li><a class="dropdown-item" href="belt-actuators.html">Belt Type</a></li>
+                                        <li><a class="dropdown-item" href="rod-type.html">Rod Type</a></li>
+                                        <li><a class="dropdown-item" href="clean-room.html">Clean Room</a></li>
+                                        <li><a class="dropdown-item" href="rack-pinion.html">Rack & Pinion</a></li>
+                                        <li><a class="dropdown-item" href="multi-axis.html">Multi Axis Actuator</a></li>
+                                    </ul>
+                                </li>
+
+                                <li class="dropdown-submenu">
+                                    <a class="dropdown-item dropdown-toggle" href="#">Actuator with Motor</a>
+                                    <ul class="dropdown-menu">
+                                        <!-- Active link is here -->
+                                        <li><a class="dropdown-item active" href="stepper-motor-actuator.html">Stepper Motor Actuator</a></li>
+                                        <li><a class="dropdown-item" href="index.html#servo-motor">Servo Motor Actuator</a></li>
+                                        <li><a class="dropdown-item" href="mini-cylinder.html">Mini Cylinder</a></li>
+                                        <li><a class="dropdown-item" href="index.html#gripper">Gripper</a></li>
+                                    </ul>
+                                </li>
+
+                                <li class="dropdown-submenu">
+                                    <a class="dropdown-item dropdown-toggle" href="#">Robot</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="index.html#desktop-robot">Desktop Robot</a></li>
+                                        <li><a class="dropdown-item" href="index.html#cartesian-robot">Cartesian Robot</a></li>
+                                        <li><a class="dropdown-item" href="index.html#linear-motor-actuator">Linear Motor Actuator</a></li>
+                                        <li><a class="dropdown-item" href="index.html#air-bearing">Air Bearing Linear Stage</a></li>
+                                        <li><a class="dropdown-item" href="index.html#cast-iron">Cast Iron Axis Stage</a></li>
+                                        <li><a class="dropdown-item" href="index.html#horizontal-z">Horizontal Z Axis Stage</a></li>
+                                        <li><a class="dropdown-item" href="index.html#alignment-stage">Alignment Stage</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">Pneumatics</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="index.html#iso-cylinder">ISO Cylinder</a></li>
+                                <li><a class="dropdown-item" href="index.html#compact-cylinder">Compact Cylinder</a></li>
+                                <li><a class="dropdown-item" href="index.html#solenoid-cylinder">Solenoid Valves</a></li>
+                                <li><a class="dropdown-item" href="index.html#pneumatic-accessories">Pneumatic Accessories</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Services
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="servicesDropdown">
+                        
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">SPM Machines</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="index.html#vision-inspection">Vision Inspection</a></li>
+                                <li><a class="dropdown-item" href="index.html#assembly-machines">Assembly Machines</a></li>
+                                <li><a class="dropdown-item" href="index.html#pick-place">Pick & Place</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">Electrical Panel</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="index.html#panel-designing">Panel Designing</a></li>
+                                <li><a class="dropdown-item" href="index.html#panel-wiring">Panel Wiring</a></li>
+                                <li><a class="dropdown-item" href="index.html#control-panel">Control Panel</a></li>
+                                <li><a class="dropdown-item" href="index.html#plc-support">PLC Support</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">Data Acquisition System</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="index.html#java-tech">Java Tech</a></li>
+                                <li><a class="dropdown-item" href="index.html#labview-tech">LabVIEW Tech</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="nav-item"><a class="nav-link" href="#contact-footer">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<main class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="fw-bold text-uppercase display-5" style="color:var(--primary);">
+            <i class="bi bi-gear-fill me-2"></i> Stepper Motor Actuators (Servo Cylinders)
+        </h1>
+        <p class="lead" style="color:var(--muted);">
+            High-precision linear actuators integrated with Closed-Loop Stepper Motors for dynamic control.
+        </p>
+    </div>
+
+    <!-- Tab Navigation for the five series -->
+    <ul class="nav nav-tabs justify-content-center flex-wrap" id="actuatorTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="cgth-tab" data-bs-toggle="tab" data-bs-target="#cgth" type="button" role="tab" aria-controls="cgth" aria-selected="true">
+                <i class="bi bi-sliders me-1"></i> CGTH Series (Slider)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="cgty-tab" data-bs-toggle="tab" data-bs-target="#cgty" type="button" role="tab" aria-controls="cgty" aria-selected="false">
+                <i class="bi bi-link-45deg me-1"></i> CGTY Series (Rod Type)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="cgch-tab" data-bs-toggle="tab" data-bs-target="#cgch" type="button" role="tab" aria-controls="cgch" aria-selected="false">
+                <i class="bi bi-x-diamond me-1"></i> CGCH Series (Cleanroom)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="cglth-tab" data-bs-toggle="tab" data-bs-target="#cglth" type="button" role="tab" aria-controls="cglth" aria-selected="false">
+                <i class="bi bi-stars me-1"></i> CGLTH Series (Oriental Motor - Ballscrew)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="cgltb-tab" data-bs-toggle="tab" data-bs-target="#cgltb" type="button" role="tab" aria-controls="cgltb" aria-selected="false">
+                <i class="bi bi-arrow-right-circle me-1"></i> CGLTB Series (Oriental Motor - Belt)
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="actuatorTabsContent">
+
+        <!-- 1. CGTH Series (Slider Type, Closed-Loop Stepper) -->
+        <div class="tab-pane fade show active" id="cgth" role="tabpanel" aria-labelledby="cgth-tab">
+            
+            <div class="hero" style="background-image:url('https://www.toyorobotics.co/assets/images/CGTH-Series.png');">
+                <h1 class="text-uppercase">CGTH Series: Integrated Linear Bearings Servo Cylinder (Slider Type)</h1>
+                <p class="lead">Converts rotary motion into precise linear motion with closed-loop positional feedback.</p>
+            </div>
+            
+            <h3 class="section-header"><i class="bi bi-info-circle-fill me-2"></i> Product Overview</h3>
+            <div class="row g-5 align-items-center">
+                <div class="col-md-7">
+                    <p>These actuators convert rotary motion into precise linear motion, thus earning the name "servo cylinder." They are designed to induce or control motion in mechanical devices. The **CGTH series** is a ball screw type actuator that comes with integrated linear bearings and is operated by a closed-loop stepper motor.</p>
+                    <p>Closed-loop stepper motors utilize an encoder or other feedback device to constantly monitor the motor's position, allowing for precise control over rotational or linear speed and position. Toyo provides these actuators along with its motor and an optional controller, offering a complete, integrated solution. The feedback mechanism allows for real-time monitoring and adjustment of movement for specific application needs.</p>
+                </div>
+                <div class="col-md-5 text-center">
+                    <img src="https://www.toyorobotics.co/assets/images/project/CGTH.png" alt="CGTH Series Actuator Diagram" class="img-fluid rounded shadow content-img" onerror="this.onerror=null; this.src='https://placehold.co/380x380/0d1b2a/ffc107?text=CGTH+Diagram';">
+                </div>
+            </div>
+
+            <h3 class="section-header"><i class="bi bi-list-check me-2"></i> Features</h3>
+            <ul>
+                <li>**Position Control:** Accurate control over the actuator’s movement through precise feedback and positioning.</li>
+                <li>**Velocity Control:** Provides control over the speed of the cylinder's movement.</li>
+                <li>**Feedback Mechanism:** Sensors monitor the actuator’s position and velocity, allowing for real-time monitoring and adjustments.</li>
+                <li>**Double-Acting:** The actuators can move in both directions, allowing bi-directional motion.</li>
+                <li>**High-Precision:** Servo cylinders are designed for high-precision applications, making them suitable for industries such as robotics and aerospace.</li>
+                <li>**Standard Controller:** The standard controller provides PULSE, communication, and other control interfaces, and can be equipped with EtherCAT networks.</li>
+            </ul>
+        </div>
+
+        <!-- 2. CGTY Series (Rod Type, Closed-Loop Stepper) -->
+        <div class="tab-pane fade" id="cgty" role="tabpanel" aria-labelledby="cgty-tab">
+            
+            <div class="hero" style="background-image:url('https://www.toyorobotics.co/assets/images/CGTY-series.png');">
+                <h1 class="text-uppercase">CGTY Series: Linear Actuator with Motor (Rod Type)</h1>
+                <p class="lead">A rod-style servo cylinder combining high efficiency and precision for crucial positioning tasks.</p>
+            </div>
+            
+            <h3 class="section-header"><i class="bi bi-info-circle-fill me-2"></i> Product Overview</h3>
+            <div class="row g-5 align-items-center">
+                <div class="col-md-7 order-md-2">
+                    <p>The **CGTY Series** is a servo cylinder or servo actuator, typically a double-acting rod-type cylinder used in mechatronic systems. These actuators commonly include ball screws, which are highly regarded for their efficiency and precision, making them perfect for applications demanding accurate positioning.</p>
+                    <p>The CGTY Series is integrated with linear bearings and comes as a complete solution with a closed-loop stepper motor. This integration simplifies installation and reduces overall system complexity. When coupled with our TC100 series controller, users can achieve enhanced performance, flexibility, and advanced automation capabilities in their systems, ensuring reliable and precise operation.</p>
+                </div>
+                <div class="col-md-5 order-md-1 text-center">
+                    <img src="https://www.toyorobotics.co/assets/images/project/CGTY.png" alt="CGTY Series Rod Type Actuator Diagram" class="img-fluid rounded shadow content-img" onerror="this.onerror=null; this.src='https://placehold.co/380x380/0d1b2a/ffc107?text=CGTY+Diagram';">
+                </div>
+            </div>
+
+            <h3 class="section-header"><i class="bi bi-list-check me-2"></i> Features</h3>
+            <ul>
+                <li>**Improved Precision:** Enhanced accuracy in motion control by continuously monitoring and correcting the motor's position through an encoder-based feedback system.</li>
+                <li>**Increased Reliability:** The feedback mechanism detects and corrects errors, ensuring consistent and reliable performance.</li>
+                <li>**Energy Savings:** Closed-loop stepper motor actuators adjust power consumption based on actual load requirements.</li>
+                <li>**Standard Controller Support:** The standard TC100 controller provides PULSE, communication, and other two control interfaces, and can be equipped with EtherCAT networks.</li>
+                <li>**Low Maintenance:** Features low noise operation and easy maintenance.</li>
+            </ul>
+        </div>
+
+        <!-- 3. CGCH Series (Slider Type, Cleanroom) -->
+        <div class="tab-pane fade" id="cgch" role="tabpanel" aria-labelledby="cgch-tab">
+            
+            <div class="hero" style="background-image:url('https://www.toyorobotics.co/assets/images/CGCH.png');">
+                <h1 class="text-uppercase">CGCH Series: Integrated Cleanroom Servo Cylinder (Slider Type)</h1>
+                <p class="lead">Ball screw driven actuator specifically designed for stringent cleanroom environments.</p>
+            </div>
+            
+            <h3 class="section-header"><i class="bi bi-info-circle-fill me-2"></i> Product Overview</h3>
+            <div class="row g-5 align-items-center">
+                <div class="col-md-7">
+                    <p>The **CGCH series** servo cylinder is a ball screw driven actuator that is specially designed for use in cleanroom applications. It includes integrated Linear Bearings for smooth and precise sliding motion. This system is provided as a combined solution with a stepper motor.</p>
+                    <p>Movement control and programming are handled by the TC100 series controller. The controller features both Pulse control mode and EtherCAT for communication control mode, offering flexible integration into advanced manufacturing setups, particularly within the semiconductor and electronics industries where cleanroom standards are mandatory.</p>
+                </div>
+                <div class="col-md-5 text-center">
+                    <img src="https://www.toyorobotics.co/assets/images/project/CGCH.png" alt="CGCH Series Cleanroom Actuator Diagram" class="img-fluid rounded shadow content-img" onerror="this.onerror=null; this.src='https://placehold.co/380x380/0d1b2a/ffc107?text=CGCH+Diagram';">
+                </div>
+            </div>
+
+            <h3 class="section-header"><i class="bi bi-list-check me-2"></i> Features</h3>
+            <ul>
+                <li>**High Repeatability:** Provides exceptionally high repeatability of $\pm 0.005\text{ mm}$.</li>
+                <li>**Mechanism:** Ball screw driven with integrated linear bearings and a slider mechanism.</li>
+                <li>**Cleanroom Design:** Specifically designed and built for rigorous cleanroom applications.</li>
+                <li>**Payload Capacity:** Maximum horizontal payload capacity of up to $\text{30 kg}$.</li>
+                <li>**Stroke & Speed:** Features a maximum stroke of up to $\text{1000 mm}$ and a maximum speed of up to $\text{600 mm/s}$.</li>
+            </ul>
+        </div>
+
+        <!-- 4. CGLTH Series (Oriental Motor, Ballscrew) -->
+        <div class="tab-pane fade" id="cglth" role="tabpanel" aria-labelledby="cglth-tab">
+            
+            <div class="hero" style="background-image:url('https://www.toyorobotics.co/assets/images/CGLTH.png');">
+                <h1 class="text-uppercase">CGLTH Series: Ballscrew Actuator with Oriental Stepper Motor</h1>
+                <p class="lead">A cost-effective co-branded solution for high-speed, precise ballscrew motion.</p>
+            </div>
+            
+            <h3 class="section-header"><i class="bi bi-info-circle-fill me-2"></i> Product Overview</h3>
+            <div class="row g-5 align-items-center">
+                <div class="col-md-7 order-md-2">
+                    <p>The **CGLTH series** is a result of a strong co-branding effort between TOYO and Oriental Motor, combining TOYO’s best mechanically designed ballscrew actuator with Oriental Motor’s high-performance stepper motor. This collaboration provides a cost-effective, low-profile, integrated-bearing motorized actuator solution.</p>
+                    <p>Oriental Motor products are renowned for precision in the motion control industry. The CGLTH series leverages this expertise, making it integral for achieving automation efficiency in various applications, from driving conveyor systems to enhancing the precision of robotic arms.</p>
+                </div>
+                <div class="col-md-5 order-md-1 text-center">
+                    <img src="https://www.toyorobotics.co/assets/images/project/CGLTH.png" alt="CGLTH Series Actuator Diagram with Oriental Motor" class="img-fluid rounded shadow content-img" onerror="this.onerror=null; this.src='https://placehold.co/380x380/0d1b2a/ffc107?text=CGLTH+Diagram';">
+                </div>
+            </div>
+
+            <h3 class="section-header"><i class="bi bi-list-check me-2"></i> Features & Applications</h3>
+            <ul>
+                <li>**Integrated Design:** Features a proprietary technology aluminum body with embedded rails and a specially integrated nut.</li>
+                <li>**Speed & Acceleration:** High speed and acceleration up to $\text{1600 mm/s}$.</li>
+                <li>**Moment Load Capacity:** Integrated rail design provides better moment load capacity.</li>
+                <li>**Longest Stroke:** Offers the longest ball screw stroke available at $\text{2500 mm}$.</li>
+                <li>**Encoder:** Includes a multi-loop absolute encoder; no batteries are required.</li>
+            </ul>
+            <p class="mt-4 fw-bold" style="color:var(--primary);"><i class="bi bi-lightning-fill me-2" style="color:var(--accent);"></i> Applications:</p>
+            <p>Positioning, Pick and place, Carrying, Press fitting.</p>
+        </div>
+
+        <!-- 5. CGLTB Series (Oriental Motor, Belt Type) -->
+        <div class="tab-pane fade" id="cgltb" role="tabpanel" aria-labelledby="cgltb-tab">
+            
+            <div class="hero" style="background-image:url('https://www.toyorobotics.co/assets/images/CGLTB.png');">
+                <h1 class="text-uppercase">CGLTB Series: Belt Actuator with Oriental Stepper Motor</h1>
+                <p class="lead">High-speed, long-stroke belt drive actuator using Oriental Motor's AZ hybrid control technology.</p>
+            </div>
+            
+            <h3 class="section-header"><i class="bi bi-info-circle-fill me-2"></i> Product Overview</h3>
+            <div class="row g-5 align-items-center">
+                <div class="col-md-7">
+                    <p>The **CGLTB series** combines a TOYO belt drive actuator with the high-performance Oriental $\text{AZ}$ motor. The $\text{AZ}$ series is particularly suited for long-stroke and high-speed positioning, which complements the belt-driven actuator perfectly.</p>
+                    <p>The $\text{AZ}$ Step Motor utilizes an innovative hybrid control method, seamlessly blending the benefits of both open-loop and closed-loop control. It constantly monitors the motor's position, automatically switching control methods as needed. Furthermore, the belt drive motorized actuator does not require a gearbox, leading to high responsiveness and acceleration. With a sealed design and an exhaust connector, it is adaptable for cleanroom use in areas like semiconductor manufacturing.</p>
+                </div>
+                <div class="col-md-5 text-center">
+                    <img src="https://www.toyorobotics.co/assets/images/project/CGLTB.png" alt="CGLTB Series Belt Actuator Diagram with Oriental Motor" class="img-fluid rounded shadow content-img" onerror="this.onerror=null; this.src='https://placehold.co/380x380/0d1b2a/ffc107?text=CGLTB+Diagram';">
+                </div>
+            </div>
+
+            <h3 class="section-header"><i class="bi bi-list-check me-2"></i> Features & Applications</h3>
+            <ul>
+                <li>**Longest Stroke:** Provides a belt drive stroke of $\text{3000 mm}$ / $\text{50}$ pitch.</li>
+                <li>**Design:** No gearbox is needed, simplifying the mechanical design.</li>
+                <li>**Speed & Acceleration:** High speed and acceleration up to $\text{3000 mm/s}$ (Maximum acceleration is $\text{0.76G}$).</li>
+                <li>**Encoder:** Uses the $\text{AZ}$ motor, which comes with a multi-turn absolute encoder.</li>
+                <li>**Repeatability:** Provides a repeatability of $\pm 0.06\text{ mm}$.</li>
+                <li>**Safety:** After an emergency stop, the system can retrieve action from the exact stop position.</li>
+                <li>**Payload:** Can support a horizontal payload of up to $\text{15 kg}$.</li>
+            </ul>
+            <p class="mt-4 fw-bold" style="color:var(--primary);"><i class="bi bi-lightning-fill me-2" style="color:var(--accent);"></i> Applications:</p>
+            <p>Positioning, Pick and place, Carrying, Press fitting.</p>
+        </div>
+
+    </div>
+    
+    <div class="text-center mt-6 py-5 border-top border-bottom">
+        <h3 class="fw-bold" style="color:var(--primary);">Need a Custom Stepper Motor Actuator Solution?</h3>
+        <p class="lead mb-4" style="color:var(--muted);">
+            From cleanroom precision (CGCH) to long-stroke speed (CGLTB), our experts can help you select the perfect servo cylinder for your application.
+        </p>
+        <a href="#contact-footer" class="btn btn-lg fw-bold" style="background:var(--accent); color:var(--primary);">
+            <i class="bi bi-envelope-fill me-2"></i> Get Technical Support
+        </a>
+    </div>
+</main> 
+
+<footer id="contact-footer">
+    <div class="container text-center">
+        <h4 class="fw-bold mb-4 text-uppercase" style="color:var(--accent);">
+            <i class="bi bi-headset me-2"></i> Contact Robo Draft Automation
+        </h4>
+        <p class="mb-2">24, Vijaya Nagar, Mel Ayanambakkam,<br>Opp to Royal Club, Chennai - 600098.</p>
+        <p class="mb-4 lead">
+            <i class="bi bi-envelope-fill me-2"></i> Email: <a href="mailto:robodraftautomation@gmail.com">robodraftautomation@gmail.com</a>
+            &nbsp;|&nbsp;
+            <i class="bi bi-phone-fill me-2"></i> Phone: <a href="tel:+919999999999">+91 99999 99999</a>
+        </p>
+        <p class="text-white-50 small">&copy; <span id="current-year"></span> Robo Draft Automation. All rights reserved.</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // JavaScript to handle the nested dropdown functionality, especially on mobile
+    document.addEventListener("DOMContentLoaded", function(){
+        // Set current year in the footer
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // Handle nested dropdowns (dropdown-submenu)
+        document.querySelectorAll('.dropdown-submenu > a').forEach(function(element){
+            element.addEventListener('click', function(e){
+                e.preventDefault();
+                e.stopPropagation(); // Stop event from closing the main dropdown
+
+                let nextSibling = element.nextElementSibling;
+                
+                // Close all other open submenus at the same level
+                element.closest('.dropdown-menu').querySelectorAll('.dropdown-menu').forEach(function(menu){
+                    if(menu !== nextSibling){
+                        menu.classList.remove('show');
+                    }
+                });
+
+                // Toggle the current submenu
+                if (nextSibling && nextSibling.classList.contains('dropdown-menu')) {
+                    nextSibling.classList.toggle('show');
+                }
+            });
+        });
+
+        // Close submenus when clicking outside (mobile fix)
+        document.querySelectorAll('.dropdown-toggle').forEach(function(toggle){
+            toggle.addEventListener('hidden.bs.dropdown', function () {
+                this.closest('.dropdown').querySelectorAll('.dropdown-submenu > .dropdown-menu').forEach(function(menu){
+                    menu.classList.remove('show');
+                });
+            })
+        });
+    });
+</script>
+</body>
+</html>

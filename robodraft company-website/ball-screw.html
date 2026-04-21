@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Robo Draft Automation | Ball Screw Type Actuators</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/jpeg" href="rda.jpg" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        /* Professional Color Palette & Typography */
+        :root {
+            --primary: #0d1b2a; /* Dark Navy for main elements */
+            --accent: #ffc107;  /* Yellow/Gold for highlights */
+            --muted: #555;      /* Darker grey for body text */
+            --light-bg: #f5f6f7; /* Very light grey background */
+            --white: #fff;
+        }
+        body { 
+            font-family: 'Poppins', 'Segoe UI', sans-serif; /* Slightly more modern font stack */
+            background: var(--light-bg); 
+            color: #222; 
+        }
+
+        /* --- Navbar Styles --- */
+        .navbar { 
+            background: var(--primary); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+        }
+        .navbar-brand img { 
+            height:56px; 
+            border-radius:6px; 
+            border:1px solid var(--accent); /* Logo highlight */
+            padding:2px; 
+        }
+        .navbar-nav .nav-link {
+            color: var(--white) !important; 
+            font-weight: 500; /* Adjusted for better readability */
+            margin: 0 8px; 
+            transition: color .3s ease-in-out;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .navbar-nav .nav-link:hover {
+            color: var(--accent) !important; 
+            text-shadow: 0 0 10px rgba(255,193,7,0.6);
+        }
+        /* Active link style inside the dropdown */
+        .dropdown-item.active {
+            background: var(--accent) !important; 
+            color: var(--primary) !important; 
+            font-weight: 600 !important;
+        }
+        
+        /* === Dropdown Submenu Fixes (LEFT side opening and stylish pop-out) === */
+        .dropdown-submenu { position:relative; }
+        .dropdown-submenu > .dropdown-menu {
+            top: 0; 
+            left: auto; 
+            right: 100%; 
+            margin-right: -1px; 
+            
+            display:none; 
+            opacity:0; 
+            transform: translateX(-10px); /* Slightly increased initial shift */
+            transition: all .3s cubic-bezier(0.165, 0.84, 0.44, 1); /* Smoother animation curve */
+
+            border:none; border-radius:10px; box-shadow:0 8px 20px rgba(0,0,0,0.2); /* Deeper shadow */
+        }
+        .dropdown-menu {
+            border:none; border-radius:10px; box-shadow:0 8px 20px rgba(0,0,0,0.2);
+            padding: 10px 0; /* Add padding inside dropdown */
+        }
+
+        @media (min-width: 992px){
+            .dropdown:hover > .dropdown-menu,
+            .dropdown-submenu:hover > .dropdown-menu { 
+                display:block; 
+                opacity:1; 
+                transform: translateX(0); 
+            }
+        }
+        .dropdown-item {
+            padding: 8px 20px;
+            font-size: 0.95rem;
+            color: #333;
+        }
+        .dropdown-item:hover { 
+            background: var(--accent); 
+            color: var(--primary); 
+            font-weight: 600; 
+        }
+        /* Mobile Fix - Cleaned up and consolidated */
+        @media (max-width: 991px){
+            .dropdown-menu { 
+                position:static !important; 
+                transform:none !important; 
+                opacity:1 !important; 
+                display:none; 
+                right: auto !important; 
+                margin-right: 0 !important;
+                border-left: 2px solid var(--accent); /* Mobile visual hierarchy */
+            }
+            .dropdown-menu.show { display:block !important; }
+            .dropdown-submenu > .dropdown-menu { 
+                margin-left: 1.5rem !important; /* Increased indent */
+                padding: 5px 0;
+            }
+        }
+        /* ================================================= */
+
+
+        /* --- Hero Section (The Top Image Area inside the tab) --- */
+        .hero {
+            background-size: cover !important;
+            background-position: center !important;
+            padding: 80px 20px; /* Reduced padding slightly */
+            text-align: center;
+            border-radius: 12px;
+            margin-top: 30px;
+            margin-bottom: 30px; /* Added bottom margin */
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15); /* Slightly stronger shadow */
+            min-height: 300px; /* Adjusted min-height */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(13, 27, 42, 0.65); /* Darker overlay for text contrast */
+            z-index: 1;
+        }
+        .hero h1, .hero p {
+            position: relative;
+            z-index: 2;
+            color: var(--accent);
+            text-shadow: 0 3px 12px rgba(0,0,0,0.95); /* Sharper text shadow */
+        }
+        .hero h1 { 
+            font-weight: 900; 
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+        .hero p.lead {
+             font-size: 1.25rem;
+             color: #ffda85; /* Lighter accent shade for lead text */
+        }
+        
+        /* --- Tabs --- */
+        .nav-tabs { 
+            border-bottom: 3px solid var(--primary); 
+            margin-bottom: 40px; /* Increased bottom margin */
+        }
+        .nav-tabs .nav-link {
+            border: 1px solid #ddd;
+            border-bottom-color: transparent;
+            margin-right: 5px;
+            background-color: #eee;
+            color: var(--primary);
+            font-weight: 700;
+            padding: 10px 20px;
+            transition: all 0.3s;
+            border-radius: 8px 8px 0 0;
+        }
+        .nav-tabs .nav-link.active {
+            color: var(--white); 
+            background-color: var(--primary); 
+            border-color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        .nav-tabs .nav-link:hover:not(.active) { background-color: #d8d8d8; }
+
+        /* --- Content Area --- */
+        .tab-pane {
+            background: var(--white);
+            padding: 40px; /* Increased padding */
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); /* Smoother shadow */
+        }
+        .section-header {
+            color: var(--primary);
+            font-weight: 800;
+            font-size: 1.8rem;
+            border-bottom: 3px solid var(--accent); /* Thicker accent line */
+            padding-bottom: 10px;
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+        ul { list-style: disc; padding-left: 25px; }
+        ul li { margin-bottom: 10px; line-height: 1.6; } /* Better line spacing */
+        p { line-height: 1.6; }
+
+        /* Image styling */
+        .content-img {
+            max-height: 380px; /* Slightly increased max-height */
+            width: auto;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        /* Call to Action Button */
+        .btn-lg {
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            transition: background 0.3s, transform 0.2s;
+        }
+        .btn-lg:hover {
+            background: #ffdb7d !important;
+            transform: translateY(-2px);
+        }
+
+        /* --- Footer --- */
+        footer {
+            background: var(--primary);
+            color: #ddd; /* Lighter text color */
+            text-align: center;
+            padding: 50px 0; /* Increased padding */
+            margin-top: 80px;
+        }
+        footer a { color: var(--accent); text-decoration: none; transition: color 0.3s; }
+        footer a:hover { color: var(--white); text-decoration: underline; }
+
+        /* Additional styles for Actuator content */
+        .specs-table th { background:var(--accent); color:#000; font-weight:700; }
+        .specs-table td, .specs-table th { vertical-align: middle; padding: 12px; }
+        .text-nowrap { white-space: nowrap; } /* To keep math notations on a single line */
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="index.html">
+            <img src="rda.jpg" alt="ROBO DRAFT logo" class="me-3">
+            <div>
+                <div style="color:var(--white); font-weight:800; font-size:1.25rem;">ROBO DRAFT AUTOMATION</div>
+                <div style="color:var(--accent); font-weight:600; font-size:.85rem; letter-spacing: 1px;">ROBUST FUTURE</div>
+            </div>
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navMenu">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="index.html#about">About</a></li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" id="productsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: var(--accent) !important;">
+                        Products
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="productsDropdown">
+
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">Toyo Actuators</a>
+                            <ul class="dropdown-menu">
+
+                                <li class="dropdown-submenu">
+                                    <a class="dropdown-item dropdown-toggle" href="#">Motorless Actuators</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item active" href="ball-screw.html">Ball Screw Type</a></li>
+                                        <li><a class="dropdown-item" href="belt-type.html">Belt Type</a></li>
+                                        <li><a class="dropdown-item" href="rod-type.html">Rod Type</a></li>
+                                        <li><a class="dropdown-item" href="clean-room.html">Clean Room</a></li>
+                                        <li><a class="dropdown-item" href="rack-pinion.html">Rack & Pinion</a></li>
+                                        <li><a class="dropdown-item" href="multi-axis.html">Multi Axis Actuator</a></li>
+                                    </ul>
+                                </li>
+
+                                <li class="dropdown-submenu">
+                                    <a class="dropdown-item dropdown-toggle" href="#">Actuator with Motor</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="stepper-motor.html">Stepper Motor Actuator</a></li>
+                                        <li><a class="dropdown-item" href="servo-motor.html">Servo Motor Actuator</a></li>
+                                        <li><a class="dropdown-item" href="mini-cylinder.html">Mini Cylinder</a></li>
+                                        <li><a class="dropdown-item" href="gripper.html">Gripper</a></li>
+                                    </ul>
+                                </li>
+
+                                <li class="dropdown-submenu">
+                                    <a class="dropdown-item dropdown-toggle active" href="#">Robot</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="desktop-robot.html">Desktop Robot</a></li>
+                                        <li><a class="dropdown-item" href="cartesian-gantry-robot.html">Cartesian Robot</a></li>
+                                        <li><a class="dropdown-item" href="linear-motor-actuator.html">Linear Motor Actuator</a></li>
+                                        <li><a class="dropdown-item active" href="air-bearing.html">Air Bearing Linear Stage</a></li>
+                                        <li><a class="dropdown-item" href="cast-iron.html">Cast Iron Axis Stage</a></li>
+                                        <li><a class="dropdown-item" href="horizontal-z.html">Horizontal Z Axis Stage</a></li>
+                                        <li><a class="dropdown-item" href="alignment-stage.html">Alignment Stage</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">Pneumatics</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="index.html#iso-cylinder">ISO Cylinder</a></li>
+                                <li><a class="dropdown-item" href="index.html#compact-cylinder">Compact Cylinder</a></li>
+                                <li><a class="dropdown-item" href="index.html#solenoid-cylinder">Solenoid Valves</a></li>
+                                <li><a class="dropdown-item" href="index.html#pneumatic-accessories">Pneumatic Accessories</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Services
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="servicesDropdown">
+                        
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">SPM Machines</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="index.html#vision-inspection">Vision Inspection</a></li>
+                                <li><a class="dropdown-item" href="index.html#assembly-machines">Assembly Machines</a></li>
+                                <li><a class="dropdown-item" href="index.html#pick-place">Pick & Place</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">Electrical Panel</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="index.html#panel-designing">Panel Designing</a></li>
+                                <li><a class="dropdown-item" href="index.html#panel-wiring">Panel Wiring</a></li>
+                                <li><a class="dropdown-item" href="index.html#control-panel">Control Panel</a></li>
+                                <li><a class="dropdown-item" href="index.html#plc-support">PLC Support</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#">Data Acquisition System</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="index.html#java-tech">Java Tech</a></li>
+                                <li><a class="dropdown-item" href="index.html#labview-tech">LabVIEW Tech</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="nav-item"><a class="nav-link" href="#contact-footer">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<main class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="fw-bold text-uppercase display-5" style="color:var(--primary);">
+            <i class="bi bi-gear-fill me-2"></i> Toyo Motorless Ball Screw Actuators
+        </h1>
+        <p class="lead" style="color:var(--muted);">
+            Precision, High-Thrust, and Long-Stroke Actuation for Industrial Automation.
+        </p>
+    </div>
+
+    <ul class="nav nav-tabs justify-content-center" id="actuatorTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="eth-tab" data-bs-toggle="tab" data-bs-target="#eth" type="button" role="tab" aria-controls="eth" aria-selected="true">
+                <i class="bi bi-rocket-fill me-1"></i> ETH Series (Compact Precision)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="gth-tab" data-bs-toggle="tab" data-bs-target="#gth" type="button" role="tab" aria-controls="gth" aria-selected="false">
+                <i class="bi bi-truck-flatbed me-1"></i> GTH Series (High Thrust)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="glth-tab" data-bs-toggle="tab" data-bs-target="#glth" type="button" role="tab" aria-controls="glth" aria-selected="false">
+                <i class="bi bi-rulers me-1"></i> GLTH Series (Long Stroke)
+            </button>
+        </li>
+    </ul>
+    <div class="tab-content" id="actuatorTabsContent">
+
+        <div class="tab-pane fade show active" id="eth" role="tabpanel" aria-labelledby="eth-tab">
+            
+            <div class="hero" style="background-image:url('https://www.toyorobotics.co/assets/images/ethseries.png');">
+                <h1 class="text-uppercase">ETH Series – Compact Precision Actuator</h1>
+                <p class="lead">High accuracy, compact linear motion solution with robust construction.</p>
+            </div>
+
+            <h3 class="section-header"><i class="bi bi-info-circle-fill me-2"></i> ETH Series Overview</h3>
+            <div class="row g-5 align-items-center">
+                <div class="col-md-5 text-center">
+                    <img src="https://www.toyorobotics.co/assets/images/project/ETH2.png" alt="ETH Series Actuator Diagram" class="img-fluid rounded shadow content-img">
+                </div>
+                <div class="col-md-7">
+                    <p>The <strong>ETH Series</strong> actuator delivers compact, high-precision linear motion ideal for positioning, pick-and-place, carrying, and press-fitting applications. Its design focuses on maximizing performance while minimizing footprint. This series is engineered for efficiency and accuracy in tight spaces.</p>
+                    <h5 class="fw-semibold mt-4" style="color:var(--primary);"><i class="bi bi-check-circle-fill me-2" style="color:var(--accent);"></i> Key Features:</h5>
+                    <ul>
+                        <li>High accuracy and steady moment with secure reliability and quality.</li>
+                        <li>Supports use with Stepper or Servo motors (Actuator with Motor).</li>
+                        <li>Provides <span class="text-nowrap">$\pm 0.01\text{ mm}$</span> of repeatability.</li>
+                        <li>Supports payloads from <span class="text-nowrap">$5\text{ kg}$</span> up to <span class="text-nowrap">$150\text{ kg}$</span>.</li>
+                    </ul>
+                    <h5 class="fw-semibold mt-4" style="color:var(--primary);"><i class="bi bi-box-seam-fill me-2" style="color:var(--accent);"></i> Typical Applications:</h5>
+                    <ul>
+                        <li>Electric device assembly</li>
+                        <li>Liquid filling and welding</li>
+                        <li>Press fitting of circuit boards and wafer boxes</li>
+                        <li>Unit arrangement and precise small component handling</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="tab-pane fade" id="gth" role="tabpanel" aria-labelledby="gth-tab">
+            <div class="hero" style="background-image:url('https://www.toyorobotics.co/assets/images/GTH.png');">
+                <h1 class="text-uppercase">GTH Series – High Thrust Linear Actuator</h1>
+                <p class="lead">Engineered for high-force applications requiring supreme accuracy and reliability.</p>
+            </div>
+
+            <h3 class="section-header"><i class="bi bi-info-circle-fill me-2"></i> GTH Series Overview</h3>
+            <div class="row g-5 align-items-center">
+                <div class="col-md-5 text-center order-md-2">
+                    <img src="https://www.toyorobotics.co/assets/images/project/GTH.png" alt="GTH Series Actuator Diagram" class="img-fluid rounded shadow content-img">
+                </div>
+                <div class="col-md-7 order-md-1">
+                    <p>The <strong>GTH Series</strong> is a workhorse, designed for applications that demand exceptional thrust and precision. It features a robust recirculating ball screw mechanism for smooth, powerful, and efficient linear motion, even under heavy loads. Its heavy-duty construction ensures longevity in demanding industrial environments.</p>
+                    <h5 class="fw-semibold mt-4" style="color:var(--primary);"><i class="bi bi-check-circle-fill me-2" style="color:var(--accent);"></i> Key Features:</h5>
+                    <ul>
+                        <li>Standard stroke up to <span class="text-nowrap">$1250\text{ mm}$</span> — extendable using rack gear, guideway, and aluminum extrusion.</li>
+                        <li>Ensured repeatability of <span class="text-nowrap">$\pm 0.005\text{ mm}$</span> for precise linear positioning.</li>
+                        <li>High speed and acceleration capabilities up to <span class="text-nowrap">$1600\text{ mm/s}$</span>.</li>
+                        <li>Supports maximum payloads of up to <span class="text-nowrap">$110\text{ kg}$</span>.</li>
+                        <li>Outer layer treated with black oxide coating for corrosion resistance and durability.</li>
+                    </ul>
+                    <h5 class="fw-semibold mt-4" style="color:var(--primary);"><i class="bi bi-box-seam-fill me-2" style="color:var(--accent);"></i> Typical Applications:</h5>
+                    <ul>
+                        <li>Heavy-duty industrial automation</li>
+                        <li>Robotics and cobots (large-scale)</li>
+                        <li>Automotive steering systems (testing)</li>
+                        <li>Wafer handling robots and SCARA mechanisms</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="tab-pane fade" id="glth" role="tabpanel" aria-labelledby="glth-tab">
+            <div class="hero" style="background-image:url('https://www.toyorobotics.co/assets/images/GLTH-ball-screw.png');">
+                <h1 class="text-uppercase">GLTH Series – Long Stroke Linear Actuator</h1>
+                <p class="lead">The economical choice for long travel, high-precision automation requirements.</p>
+            </div>
+
+            <h3 class="section-header"><i class="bi bi-info-circle-fill me-2"></i> GLTH Series Overview</h3>
+            <div class="row g-5 align-items-center">
+                <div class="col-md-5 text-center">
+                    <img src="https://www.toyorobotics.co/assets/images/project/GLTH-series.png" alt="GLTH Series Actuator Diagram" class="img-fluid rounded shadow content-img">
+                </div>
+                <div class="col-md-7">
+                    <p>The <strong>GLTH Series</strong> strikes a perfect balance between affordability, precision, and versatility. It is the go-to solution for applications in robotics, automation, CNC, aerospace, and medical fields where long-stroke movement is critical. This series provides extended travel capability without compromising on positioning accuracy.</p>
+                    <h5 class="fw-semibold mt-4" style="color:var(--primary);"><i class="bi bi-check-circle-fill me-2" style="color:var(--accent);"></i> Key Features:</h5>
+                    <ul>
+                        <li>Economical and durable design offering a balance of performance and affordability.</li>
+                        <li>Supports stepper or servo motor integration for flexibility.</li>
+                        <li>Compact and lightweight — suitable for limited-space installations.</li>
+                        <li>Ensured repeatability of <span class="text-nowrap">$\pm 0.005\text{ mm}$</span>.</li>
+                        <li>Stroke length up to <span class="text-nowrap">$1500\text{ mm}$</span>.</li>
+                    </ul>
+                    <h5 class="fw-semibold mt-4" style="color:var(--primary);"><i class="bi bi-box-seam-fill me-2" style="color:var(--accent);"></i> Typical Applications:</h5>
+                    <ul>
+                        <li>Circuit Board Surface Cleaning Device (long travel)</li>
+                        <li>Coating Device for Small Applications (dispensing/rubberizing)</li>
+                        <li>Cutting for Glass Substrate Boards (X-Y-Z systems)</li>
+                        <li>Piling Device for Circuit Boards (receiver mechanisms)</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div> 
+    <div class="text-center mt-6 py-5 border-top border-bottom">
+        <h3 class="fw-bold" style="color:var(--primary);">Need a Customized Automation Solution?</h3>
+        <p class="lead mb-4" style="color:var(--muted);">
+            Our engineers are ready to help you select the ideal Toyo Actuator and integrate it seamlessly into your process.
+        </p>
+        <a href="#contact-footer" class="btn btn-lg fw-bold" style="background:var(--accent); color:var(--primary);">
+            <i class="bi bi-envelope-fill me-2"></i> Request a Quote
+        </a>
+    </div>
+    </main> 
+
+<footer id="contact-footer">
+    <div class="container text-center">
+        <h4 class="fw-bold mb-4 text-uppercase" style="color:var(--accent);">
+            <i class="bi bi-headset me-2"></i> Contact Robo Draft Automation
+        </h4>
+        <p class="mb-2">24, Vijaya Nagar, Mel Ayanambakkam,<br>Opp to Royal Club, Chennai - 600098.</p>
+        <p class="mb-4 lead">
+            <i class="bi bi-envelope-fill me-2"></i> Email: <a href="mailto:robodraftautomation@gmail.com">robodraftautomation@gmail.com</a>
+            &nbsp;|&nbsp;
+            <i class="bi bi-phone-fill me-2"></i> Phone: 
+            <a href="tel:9944533640" class="text-nowrap">99445 33640</a>, 
+            <a href="tel:9840435640" class="text-nowrap">98404 35640</a>
+        </p>
+        <hr style="border-color: #333; width: 50%; margin: 0 auto 20px;">
+        <p style="font-size:0.85rem; color:#aaa;">&copy; 2025 <strong>ROBO DRAFT AUTOMATION</strong>. All Rights Reserved. | <a href="index.html">Home</a></p>
+    </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.querySelectorAll('.dropdown-submenu > a').forEach(function(element){
+        element.addEventListener('click', function(e){
+            // Only apply custom logic for screens smaller than the 'lg' breakpoint (992px)
+            if(window.innerWidth < 992){
+                e.preventDefault();
+                e.stopPropagation();
+                const sub = this.nextElementSibling;
+                
+                // Toggle 'show' class
+                if(sub){ sub.classList.toggle('show'); }
+
+                // Close all other open submenus at this level
+                this.parentElement.parentElement.querySelectorAll('.dropdown-menu.show').forEach(function(openMenu){
+                    if(openMenu !== sub){
+                        openMenu.classList.remove('show');
+                    }
+                });
+            }
+        });
+    });
+</script>
+</body>
+</html>
