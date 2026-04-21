@@ -43,7 +43,8 @@ rda.jpg
 ---
 
 ## 📸 Screenshot
-![RDA Preview](rda.jpg)
+![Uploading image.png…]()
+
 
 ---
 
