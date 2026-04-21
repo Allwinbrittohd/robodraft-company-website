@@ -43,7 +43,8 @@ rda.jpg
 ---
 
 ## 📸 Screenshot
-![Uploading image.png…]()
+<img width="1913" height="953" alt="image" src="https://github.com/user-attachments/assets/16cce8a6-c8ba-42a0-a2d5-b8fe0e2e4add" />
+
 
 
 ---
